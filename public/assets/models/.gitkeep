@@ -1,0 +1,1 @@
+# Place .ply Gaussian Splat files here\n# Reference them in mock-data.ts as plyUrl: "/assets/models/filename.ply"
