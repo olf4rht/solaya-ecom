@@ -34,17 +34,13 @@ export default function IndustryPage() {
       <Navbar />
 
       {/* Industry info — top left */}
-      <div className="fixed top-[160px] left-[41px] z-30">
+      <div style={{ paddingTop: "130px", paddingLeft: "41px", paddingRight: "41px" }}>
         <p className="text-[11px] font-medium text-content-secondary tracking-wide mb-2">
           Industry {padIndex(currentIndex)} / {padIndex(TOTAL_INDUSTRIES)}
         </p>
         <h2 className="text-[30px] font-normal text-[#302c2c] tracking-[-0.6px] leading-[1.1]">
           {industry.industry}
         </h2>
-        <div className="mt-5 flex items-baseline gap-[40px]">
-          <span className="text-[11px] font-medium text-content-primary">Brand:</span>
-          <span className="text-[11px] font-normal text-content-primary">{industry.brand}</span>
-        </div>
       </div>
 
       {/* Mini video thumbnails — top right */}
@@ -86,12 +82,8 @@ export default function IndustryPage() {
 
       {/* 3x2 Grid of .ply viewers */}
       <div
-        className="fixed z-20"
         style={{
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: "70vw",
+          margin: "30px 41px 80px 41px",
           aspectRatio: "3 / 2",
         }}
       >
@@ -126,7 +118,7 @@ export default function IndustryPage() {
       </div>
 
       {/* Footer */}
-      <div className="fixed bottom-[30px] left-[41px] z-30 flex items-center gap-[40px]">
+      <div style={{ padding: "0 41px 30px 41px" }} className="flex items-center gap-[40px]">
         <span className="text-[11px] font-medium text-content-secondary cursor-pointer hover:opacity-70 transition-opacity">
           Terms of Service
         </span>
