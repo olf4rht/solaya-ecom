@@ -136,9 +136,15 @@ function ViewToggle({
   );
 }
 
-function Footage({ item }: { item: IndustrySection }) {
+function Footage({ item, startTime, onVideoRef }: { item: IndustrySection; startTime?: number; onVideoRef?: (el: HTMLVideoElement | null) => void }) {
   return item.videoUrl ? (
     <video
+      ref={(el) => {
+        if (el && startTime !== undefined) {
+          el.currentTime = startTime;
+        }
+        onVideoRef?.(el);
+      }}
       src={item.videoUrl}
       autoPlay
       loop
@@ -162,6 +168,7 @@ function Footage({ item }: { item: IndustrySection }) {
 interface TransitionState {
   index: number;
   fromRect: DOMRect;
+  videoTime: number;
 }
 
 export default function IndustryShowcase() {
@@ -169,11 +176,12 @@ export default function IndustryShowcase() {
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [transition, setTransition] = useState<TransitionState | null>(null);
   const [expandPhase, setExpandPhase] = useState<"start" | "end" | null>(null);
-  const [retract, setRetract] = useState<{ index: number; toRect: { left: number; top: number; width: number; height: number } } | null>(null);
+  const [retract, setRetract] = useState<{ index: number; toRect: { left: number; top: number; width: number; height: number }; videoTime: number } | null>(null);
   const [retractPhase, setRetractPhase] = useState<"start" | "end" | null>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const gridItemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const overlayVideoTimeRef = useRef<number>(0);
 
   useEffect(() => {
     if (viewMode !== "list") return;
@@ -217,7 +225,9 @@ export default function IndustryShowcase() {
     }
 
     const fromRect = el.getBoundingClientRect();
-    setTransition({ index, fromRect });
+    const video = el.querySelector("video");
+    const videoTime = video ? video.currentTime : 0;
+    setTransition({ index, fromRect, videoTime });
     setExpandPhase("start");
 
     // Trigger the expand animation on the next frame
@@ -229,6 +239,10 @@ export default function IndustryShowcase() {
 
     // After animation completes, switch to list view
     setTimeout(() => {
+      // Capture overlay video time before removing it
+      const overlayVideo = document.querySelector(".fixed.inset-0.z-40 video") as HTMLVideoElement | null;
+      overlayVideoTimeRef.current = overlayVideo ? overlayVideo.currentTime : videoTime;
+
       setActiveIndex(index);
       setViewMode("list");
       setTransition(null);
@@ -238,6 +252,11 @@ export default function IndustryShowcase() {
         const section = sectionRefs.current[index];
         if (section) {
           section.scrollIntoView({ behavior: "instant" });
+          // Sync the list view video to the overlay's playback position
+          const listVideo = section.querySelector("video");
+          if (listVideo) {
+            listVideo.currentTime = overlayVideoTimeRef.current;
+          }
         }
       });
     }, EXPAND_DURATION);
@@ -251,7 +270,12 @@ export default function IndustryShowcase() {
     const itemLeft = startLeft + activeIndex * (gridItemSize + gap);
     const itemTop = (window.innerHeight - gridItemSize) / 2;
 
-    setRetract({ index: activeIndex, toRect: { left: itemLeft, top: itemTop, width: gridItemSize, height: gridItemSize } });
+    // Capture current video time from list view
+    const section = sectionRefs.current[activeIndex];
+    const listVideo = section?.querySelector("video");
+    const videoTime = listVideo ? listVideo.currentTime : 0;
+
+    setRetract({ index: activeIndex, toRect: { left: itemLeft, top: itemTop, width: gridItemSize, height: gridItemSize }, videoTime });
     setRetractPhase("start");
 
     requestAnimationFrame(() => {
@@ -261,9 +285,22 @@ export default function IndustryShowcase() {
     });
 
     setTimeout(() => {
+      // Capture overlay video time before removing
+      const overlayVideo = document.querySelector(".fixed.inset-0.z-40 video") as HTMLVideoElement | null;
+      overlayVideoTimeRef.current = overlayVideo ? overlayVideo.currentTime : videoTime;
+
       setViewMode("grid");
       setRetract(null);
       setRetractPhase(null);
+
+      // Sync the grid video after switching
+      requestAnimationFrame(() => {
+        const gridEl = gridItemRefs.current[activeIndex];
+        const gridVideo = gridEl?.querySelector("video");
+        if (gridVideo) {
+          gridVideo.currentTime = overlayVideoTimeRef.current;
+        }
+      });
     }, EXPAND_DURATION);
   }, [activeIndex]);
 
@@ -434,7 +471,15 @@ export default function IndustryShowcase() {
               willChange: "left, top, width, height",
             }}
           >
-            <Footage item={industries[transition.index]} />
+            <Footage
+              item={industries[transition.index]}
+              startTime={transition.videoTime}
+              onVideoRef={(el) => {
+                if (el) {
+                  overlayVideoTimeRef.current = el.currentTime;
+                }
+              }}
+            />
           </div>
 
           {/* Industry info fading in */}
@@ -478,7 +523,7 @@ export default function IndustryShowcase() {
               willChange: "left, top, width, height",
             }}
           >
-            <Footage item={industries[retract.index]} />
+            <Footage item={industries[retract.index]} startTime={retract.videoTime} />
           </div>
         </div>
       )}
