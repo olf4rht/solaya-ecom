@@ -45,7 +45,7 @@ export default function Navbar() {
               priority
             />
           </Link>
-          <div className="flex items-center justify-between w-full text-[11px] font-medium whitespace-nowrap">
+          <div className="flex items-center w-full text-[11px] font-medium whitespace-nowrap">
             <button
               onClick={() => setExpanded(!expanded)}
               className="hover:opacity-70 transition-opacity cursor-pointer"
@@ -53,27 +53,29 @@ export default function Navbar() {
             >
               Industry
             </button>
-            <button
-              className="hover:opacity-70 transition-opacity cursor-pointer"
-              style={{
-                color: expanded ? "#BBBBB7" : "#2A2A27",
-                transition: "color 300ms ease",
-              }}
-            >
-              Contact us
-            </button>
-            <a
-              href="https://solaya.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-right hover:opacity-70 transition-opacity"
-              style={{
-                color: expanded ? "#BBBBB7" : "#2A2A27",
-                transition: "color 300ms ease",
-              }}
-            >
-              Solaya Website
-            </a>
+            <div className="ml-auto flex items-center gap-[24px]">
+              <button
+                className="hover:opacity-70 transition-opacity cursor-pointer"
+                style={{
+                  color: expanded ? "#BBBBB7" : "#2A2A27",
+                  transition: "color 300ms ease",
+                }}
+              >
+                Contact us
+              </button>
+              <a
+                href="https://solaya.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:opacity-70 transition-opacity"
+                style={{
+                  color: expanded ? "#BBBBB7" : "#2A2A27",
+                  transition: "color 300ms ease",
+                }}
+              >
+                Solaya Website
+              </a>
+            </div>
           </div>
         </div>
 
