@@ -137,22 +137,11 @@ export default function GaussianSplatViewer({
             splatMeshRef.current = splatMesh;
           }
 
-          if (splatMesh && splatMesh.getSplatCount && splatMesh.getSplatCenter) {
-            const count = splatMesh.getSplatCount();
-            const center = new THREE.Vector3();
-            const temp = new THREE.Vector3();
-
-            for (let i = 0; i < count; i++) {
-              splatMesh.getSplatCenter(i, temp);
-              center.add(temp);
-            }
-            center.divideScalar(count);
-
-            if (controls) {
-              controls.target.copy(center);
-            }
-            camera.lookAt(center);
+          // Use provided lookAt instead of computing center of gravity
+          if (controls) {
+            controls.target.set(...cameraLookAt);
           }
+          camera.lookAt(...cameraLookAt);
         } catch (e) {
           console.warn("[GS3D] Could not configure controls:", e);
         }
