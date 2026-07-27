@@ -11,6 +11,17 @@ interface GaussianSplatViewerProps {
   style?: React.CSSProperties;
   cameraPosition?: [number, number, number];
   cameraLookAt?: [number, number, number];
+  objectRotation?: [number, number, number]; // Euler degrees [x, y, z]
+}
+
+function eulerDegreesToQuat(degrees: [number, number, number]): [number, number, number, number] {
+  const euler = new THREE.Euler(
+    degrees[0] * Math.PI / 180,
+    degrees[1] * Math.PI / 180,
+    degrees[2] * Math.PI / 180,
+  );
+  const q = new THREE.Quaternion().setFromEuler(euler);
+  return [q.w, q.x, q.y, q.z];
 }
 
 // 130mm focal length on 35mm full-frame (24mm sensor height)
@@ -32,6 +43,7 @@ export default function GaussianSplatViewer({
   style,
   cameraPosition = [-12, 0.3, 0],
   cameraLookAt = [0, 0, 0],
+  objectRotation = [0, 0, 0],
 }: GaussianSplatViewerProps) {
   const outerRef = useRef<HTMLDivElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -44,6 +56,7 @@ export default function GaussianSplatViewer({
     minDistance: number;
     maxDistance: number;
   } | null>(null);
+  const splatMeshRef = useRef<THREE.Object3D | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
 
   // Load model — only depends on plyUrl
@@ -84,11 +97,12 @@ export default function GaussianSplatViewer({
 
         viewerRef.current = viewer;
 
+        const quat = eulerDegreesToQuat(objectRotation);
         await viewer.addSplatScene(proxiedUrl, {
           splatAlphaRemovalThreshold: 5,
           showLoadingUI: false,
           position: [0, 0, 0],
-          rotation: [1, 0, 0, 0],
+          rotation: quat,
           scale: [1, 1, 1],
           format: 2,
         });
@@ -114,10 +128,14 @@ export default function GaussianSplatViewer({
             controlsRef.current = controls;
           }
 
-          const splatMesh = viewerAny.splatMesh as {
+          const splatMesh = viewerAny.splatMesh as (THREE.Object3D & {
             getSplatCenter: (index: number, out: THREE.Vector3) => void;
             getSplatCount: () => number;
-          } | undefined;
+          }) | undefined;
+
+          if (splatMesh) {
+            splatMeshRef.current = splatMesh;
+          }
 
           if (splatMesh && splatMesh.getSplatCount && splatMesh.getSplatCenter) {
             const count = splatMesh.getSplatCount();
@@ -152,6 +170,7 @@ export default function GaussianSplatViewer({
       disposed = true;
       cameraRef.current = null;
       controlsRef.current = null;
+      splatMeshRef.current = null;
       if (viewerRef.current) {
         try {
           (viewerRef.current as { dispose: () => void }).dispose();
@@ -180,6 +199,18 @@ export default function GaussianSplatViewer({
       controlsRef.current.maxDistance = dist;
     }
   }, [cameraPosition, cameraLookAt]);
+
+  // Update object rotation live
+  useEffect(() => {
+    const mesh = splatMeshRef.current;
+    if (!mesh) return;
+    const euler = new THREE.Euler(
+      objectRotation[0] * Math.PI / 180,
+      objectRotation[1] * Math.PI / 180,
+      objectRotation[2] * Math.PI / 180,
+    );
+    mesh.quaternion.setFromEuler(euler);
+  }, [objectRotation]);
 
   if (!plyUrl) {
     return (

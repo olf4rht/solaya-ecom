@@ -19,6 +19,7 @@ export default function IndustryPage() {
   const [showControls, setShowControls] = useState(false);
   const [camPos, setCamPos] = useState<[number, number, number]>([-12, 0.3, 0]);
   const [camLookAt, setCamLookAt] = useState<[number, number, number]>([0, 0, 0]);
+  const [objRotation, setObjRotation] = useState<[number, number, number]>([0, 0, 0]);
 
   const currentIndex = industries.findIndex((item) => item.slug === slug);
   const industry = industries[currentIndex];
@@ -112,11 +113,35 @@ export default function IndustryPage() {
               </span>
             </div>
           ))}
+          <p className="text-[11px] font-medium text-content-primary mb-3 mt-4">Object Rotation (deg)</p>
+          {(["X", "Y", "Z"] as const).map((axis, i) => (
+            <div key={axis} className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] font-medium text-content-secondary w-[14px]">{axis}</span>
+              <input
+                type="range"
+                min="-180"
+                max="180"
+                step="1"
+                value={objRotation[i]}
+                onChange={(e) => {
+                  const next = [...objRotation] as [number, number, number];
+                  next[i] = parseFloat(e.target.value);
+                  setObjRotation(next);
+                }}
+                className="flex-1"
+              />
+              <span className="text-[10px] font-mono text-content-secondary w-[40px] text-right">
+                {objRotation[i].toFixed(0)}
+              </span>
+            </div>
+          ))}
           <div className="mt-3 p-2 bg-[#f5f5f0] rounded-[6px]">
             <p className="text-[10px] font-mono text-content-secondary break-all select-all">
               pos: [{camPos.map((v) => v.toFixed(1)).join(", ")}]
               <br />
               lookAt: [{camLookAt.map((v) => v.toFixed(1)).join(", ")}]
+              <br />
+              rotation: [{objRotation.map((v) => v.toFixed(0)).join(", ")}]
             </p>
           </div>
         </div>
@@ -154,6 +179,7 @@ export default function IndustryPage() {
                 fallbackAlt={`${industry.industry} product ${i + 1}`}
                 cameraPosition={camPos}
                 cameraLookAt={camLookAt}
+                objectRotation={objRotation}
                 style={{ width: "100%", height: "100%" }}
               />
             </div>
