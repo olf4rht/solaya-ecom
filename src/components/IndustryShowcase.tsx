@@ -186,6 +186,19 @@ export default function IndustryShowcase() {
     setTimeout(() => setIsAnimating(false), DURATION);
   }, [isAnimating]);
 
+  // Listen for industry selection from Navbar
+  useEffect(() => {
+    const onSelect = (e: Event) => {
+      const index = (e as CustomEvent).detail as number;
+      if (index >= 0 && index < TOTAL) {
+        setActiveIndex(index);
+        setViewMode("list");
+      }
+    };
+    window.addEventListener("selectIndustry", onSelect);
+    return () => window.removeEventListener("selectIndustry", onSelect);
+  }, []);
+
   const handleClose = useCallback(() => {
     if (isAnimating) return;
     setIsAnimating(true);
