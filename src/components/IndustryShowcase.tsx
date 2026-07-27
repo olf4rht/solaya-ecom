@@ -283,10 +283,13 @@ export default function IndustryShowcase() {
       {viewMode === "list" && !retract && (
         <button
           onClick={handleClose}
-          className="fixed top-[200px] right-[41px] z-50 cursor-pointer"
+          className="fixed z-50 cursor-pointer"
           style={{
+            top: "200px",
+            right: "41px",
             opacity: 1,
             transition: `opacity 400ms ${EASE}`,
+            padding: "8px",
           }}
         >
           <CloseIcon />
