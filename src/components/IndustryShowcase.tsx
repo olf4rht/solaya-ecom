@@ -60,7 +60,7 @@ const industries: IndustrySection[] = [
 
 const EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
 const TOTAL = industries.length;
-const EXPAND_DURATION = 700;
+const DURATION = 700;
 
 function ListIcon() {
   return (
@@ -136,397 +136,196 @@ function ViewToggle({
   );
 }
 
-function Footage({ item, startTime, onVideoRef }: { item: IndustrySection; startTime?: number; onVideoRef?: (el: HTMLVideoElement | null) => void }) {
-  return item.videoUrl ? (
-    <video
-      ref={(el) => {
-        if (el && startTime !== undefined) {
-          el.currentTime = startTime;
-        }
-        onVideoRef?.(el);
-      }}
-      src={item.videoUrl}
-      autoPlay
-      loop
-      muted
-      playsInline
-      className="w-full h-full object-contain"
-    />
-  ) : item.image ? (
-    <div className="relative w-full h-full">
-      <Image
-        src={item.image}
-        alt={item.industry}
-        fill
-        className="object-contain"
-        sizes="70vw"
-      />
-    </div>
-  ) : null;
-}
-
-interface TransitionState {
-  index: number;
-  fromRect: DOMRect;
-  videoTime: number;
-}
-
 export default function IndustryShowcase() {
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [activeIndex, setActiveIndex] = useState(0);
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
-  const [transition, setTransition] = useState<TransitionState | null>(null);
-  const [expandPhase, setExpandPhase] = useState<"start" | "end" | null>(null);
-  const [retract, setRetract] = useState<{ index: number; toRect: { left: number; top: number; width: number; height: number }; videoTime: number } | null>(null);
-  const [retractPhase, setRetractPhase] = useState<"start" | "end" | null>(null);
-  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const gridItemRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const overlayVideoTimeRef = useRef<number>(0);
-
-  useEffect(() => {
-    if (viewMode !== "list") return;
-
-    const container = scrollRef.current;
-    if (!container) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const index = sectionRefs.current.indexOf(
-              entry.target as HTMLDivElement
-            );
-            if (index !== -1) {
-              setActiveIndex(index);
-            }
-          }
-        });
-      },
-      { threshold: 0.6, root: container }
-    );
-
-    sectionRefs.current.forEach((ref) => {
-      if (ref) observer.observe(ref);
-    });
-
-    return () => observer.disconnect();
-  }, [viewMode]);
-
-  const handleViewChange = useCallback((mode: ViewMode) => {
-    setViewMode(mode);
-  }, []);
-
-  const handleGridSelect = useCallback((index: number) => {
-    const el = gridItemRefs.current[index];
-    if (!el) {
-      setActiveIndex(index);
-      setViewMode("list");
-      return;
-    }
-
-    const fromRect = el.getBoundingClientRect();
-    const video = el.querySelector("video");
-    const videoTime = video ? video.currentTime : 0;
-    setTransition({ index, fromRect, videoTime });
-    setExpandPhase("start");
-
-    // Trigger the expand animation on the next frame
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setExpandPhase("end");
-      });
-    });
-
-    // After animation completes, switch to list view
-    setTimeout(() => {
-      // Capture overlay video time before removing it
-      const overlayVideo = document.querySelector(".fixed.inset-0.z-40 video") as HTMLVideoElement | null;
-      overlayVideoTimeRef.current = overlayVideo ? overlayVideo.currentTime : videoTime;
-
-      setActiveIndex(index);
-      setViewMode("list");
-      setTransition(null);
-      setExpandPhase(null);
-
-      requestAnimationFrame(() => {
-        const section = sectionRefs.current[index];
-        if (section) {
-          section.scrollIntoView({ behavior: "instant" });
-          // Sync the list view video to the overlay's playback position
-          const listVideo = section.querySelector("video");
-          if (listVideo) {
-            listVideo.currentTime = overlayVideoTimeRef.current;
-          }
-        }
-      });
-    }, EXPAND_DURATION);
-  }, []);
-
-  const handleClose = useCallback(() => {
-    const gridItemSize = 200;
-    const gap = 16;
-    const totalWidth = TOTAL * gridItemSize + (TOTAL - 1) * gap;
-    const startLeft = (window.innerWidth - totalWidth) / 2;
-    const itemLeft = startLeft + activeIndex * (gridItemSize + gap);
-    const itemTop = (window.innerHeight - gridItemSize) / 2;
-
-    // Capture current video time from list view
-    const section = sectionRefs.current[activeIndex];
-    const listVideo = section?.querySelector("video");
-    const videoTime = listVideo ? listVideo.currentTime : 0;
-
-    setRetract({ index: activeIndex, toRect: { left: itemLeft, top: itemTop, width: gridItemSize, height: gridItemSize }, videoTime });
-    setRetractPhase("start");
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setRetractPhase("end");
-      });
-    });
-
-    setTimeout(() => {
-      // Capture overlay video time before removing
-      const overlayVideo = document.querySelector(".fixed.inset-0.z-40 video") as HTMLVideoElement | null;
-      overlayVideoTimeRef.current = overlayVideo ? overlayVideo.currentTime : videoTime;
-
-      setViewMode("grid");
-      setRetract(null);
-      setRetractPhase(null);
-
-      // Sync the grid video after switching
-      requestAnimationFrame(() => {
-        const gridEl = gridItemRefs.current[activeIndex];
-        const gridVideo = gridEl?.querySelector("video");
-        if (gridVideo) {
-          gridVideo.currentTime = overlayVideoTimeRef.current;
-        }
-      });
-    }, EXPAND_DURATION);
-  }, [activeIndex]);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const scrollCooldown = useRef(false);
 
   const padIndex = (i: number) => String(i + 1).padStart(2, "0");
 
-  // Calculate the target rect (center of viewport, 70vw x 70vh)
-  const targetWidth = typeof window !== "undefined" ? window.innerWidth * 0.7 : 800;
-  const targetHeight = typeof window !== "undefined" ? window.innerHeight * 0.7 : 600;
-  const targetLeft = typeof window !== "undefined" ? (window.innerWidth - targetWidth) / 2 : 0;
-  const targetTop = typeof window !== "undefined" ? (window.innerHeight - targetHeight) / 2 : 0;
+  // Grid positions: centered row of 200px items with 16px gaps
+  const getGridPos = useCallback((index: number) => {
+    const size = 200;
+    const gap = 16;
+    const totalW = TOTAL * size + (TOTAL - 1) * gap;
+    const startX = (typeof window !== "undefined" ? window.innerWidth : 1440) / 2 - totalW / 2;
+    const startY = (typeof window !== "undefined" ? window.innerHeight : 900) / 2 - size / 2;
+    return {
+      left: startX + index * (size + gap),
+      top: startY,
+      width: size,
+      height: size,
+    };
+  }, []);
+
+  // Expanded position: centered 70vw x 70vh
+  const getExpandedPos = useCallback(() => {
+    const w = (typeof window !== "undefined" ? window.innerWidth : 1440) * 0.7;
+    const h = (typeof window !== "undefined" ? window.innerHeight : 900) * 0.7;
+    return {
+      left: (typeof window !== "undefined" ? window.innerWidth : 1440) / 2 - w / 2,
+      top: (typeof window !== "undefined" ? window.innerHeight : 900) / 2 - h / 2,
+      width: w,
+      height: h,
+    };
+  }, []);
+
+  const handleExpand = useCallback((index: number) => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setActiveIndex(index);
+    setViewMode("list");
+    setTimeout(() => setIsAnimating(false), DURATION);
+  }, [isAnimating]);
+
+  const handleClose = useCallback(() => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setViewMode("grid");
+    setTimeout(() => setIsAnimating(false), DURATION);
+  }, [isAnimating]);
+
+  const handleViewChange = useCallback((mode: ViewMode) => {
+    if (isAnimating) return;
+    if (mode === viewMode) return;
+    setIsAnimating(true);
+    setViewMode(mode);
+    setTimeout(() => setIsAnimating(false), DURATION);
+  }, [isAnimating, viewMode]);
+
+  // Scroll/wheel navigation in expanded mode
+  useEffect(() => {
+    if (viewMode !== "list") return;
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (scrollCooldown.current || isAnimating) return;
+
+      if (Math.abs(e.deltaY) > 20) {
+        scrollCooldown.current = true;
+        if (e.deltaY > 0 && activeIndex < TOTAL - 1) {
+          setActiveIndex((i) => i + 1);
+        } else if (e.deltaY < 0 && activeIndex > 0) {
+          setActiveIndex((i) => i - 1);
+        }
+        setTimeout(() => {
+          scrollCooldown.current = false;
+        }, 600);
+      }
+    };
+
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => window.removeEventListener("wheel", onWheel);
+  }, [viewMode, activeIndex, isAnimating]);
+
+  const expanded = getExpandedPos();
 
   return (
     <>
       <ViewToggle viewMode={viewMode} onChange={handleViewChange} />
 
-      {/* Close button — fixed top right, list view only */}
-      {viewMode === "list" && !retract && (
+      {/* Close button — list view only */}
+      {viewMode === "list" && (
         <button
           onClick={handleClose}
           className="fixed z-50 cursor-pointer"
           style={{
             top: "200px",
             right: "41px",
-            opacity: 1,
-            transition: `opacity 400ms ${EASE}`,
             padding: "8px",
+            opacity: isAnimating ? 0 : 1,
+            transition: `opacity 400ms ${EASE}`,
           }}
         >
           <CloseIcon />
         </button>
       )}
 
+      {/* Industry info — list view only */}
       <div
-        className="w-full"
+        className="fixed z-30"
         style={{
-          height: "100vh",
-          transition: `opacity 400ms ${EASE}`,
+          top: "160px",
+          left: "41px",
+          opacity: viewMode === "list" && !isAnimating ? 1 : 0,
+          transform: viewMode === "list" && !isAnimating ? "translateY(0)" : "translateY(12px)",
+          transition: `opacity 500ms ${EASE} ${viewMode === "list" ? "300ms" : "0ms"}, transform 500ms ${EASE} ${viewMode === "list" ? "300ms" : "0ms"}`,
+          pointerEvents: "none",
         }}
       >
-        {viewMode === "grid" ? (
-          <div className="w-full h-full flex items-center justify-center px-12">
-            <div className="flex items-center gap-4">
-              {industries.map((item, index) => (
-                <button
-                  key={item.id}
-                  ref={(el) => { gridItemRefs.current[index] = el; }}
-                  onClick={() => handleGridSelect(index)}
-                  className="shrink-0 cursor-pointer"
-                  style={{
-                    width: "200px",
-                    height: "200px",
-                    opacity: transition ? 0 : 1,
-                    transition: transition ? `opacity 300ms ${EASE}` : "none",
-                  }}
-                >
-                  {item.videoUrl ? (
-                    <video
-                      src={item.videoUrl}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-contain pointer-events-none"
-                    />
-                  ) : item.image ? (
-                    <div className="relative w-full h-full">
-                      <Image
-                        src={item.image}
-                        alt={item.industry}
-                        fill
-                        className="object-contain"
-                        sizes="200px"
-                      />
-                    </div>
-                  ) : null}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div
-            ref={scrollRef}
-            className="w-full"
-            style={{
-              height: "100vh",
-              overflowY: "auto",
-              scrollSnapType: "y mandatory",
-            }}
-          >
-            {industries.map((item, index) => {
-              const isActive = activeIndex === index;
-
-              return (
-                <div
-                  key={item.id}
-                  ref={(el) => {
-                    sectionRefs.current[index] = el;
-                  }}
-                  className="relative w-full flex items-center justify-center"
-                  style={{
-                    height: "100vh",
-                    scrollSnapAlign: "start",
-                    scrollSnapStop: "always",
-                  }}
-                >
-                  {/* Centered footage */}
-                  <div
-                    className="flex items-center justify-center"
-                    style={{
-                      transform: isActive ? "scale(1)" : "scale(0.5)",
-                      opacity: retract && retract.index === index ? 0 : (isActive ? 1 : 0.5),
-                      transition: `transform 800ms ${EASE}, opacity 800ms ${EASE}`,
-                      willChange: "transform, opacity",
-                      width: "70vw",
-                      height: "70vh",
-                      position: "relative",
-                    }}
-                  >
-                    <Footage item={item} />
-                  </div>
-
-                  {/* Industry info — top left */}
-                  <div
-                    className="absolute top-[160px] left-[41px]"
-                    style={{
-                      opacity: isActive && !retract ? 1 : 0,
-                      transform: isActive && !retract
-                        ? "translateY(0)"
-                        : "translateY(12px)",
-                      transition: `opacity 600ms ${EASE} 200ms, transform 600ms ${EASE} 200ms`,
-                    }}
-                  >
-                    <p className="text-[11px] font-medium text-content-secondary tracking-wide mb-2">
-                      Industry {padIndex(index)} / {padIndex(TOTAL)}
-                    </p>
-                    <h2 className="text-[30px] font-normal text-[#302c2c] tracking-[-0.6px] leading-[1.1]">
-                      {item.industry}
-                    </h2>
-                    <div className="mt-5 flex items-baseline gap-[40px]">
-                      <span className="text-[11px] font-medium text-content-primary">
-                        Brand:
-                      </span>
-                      <span className="text-[11px] font-normal text-content-primary">
-                        {item.brand}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-content-tertiary mt-1">0°</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <p className="text-[11px] font-medium text-content-secondary tracking-wide mb-2">
+          Industry {padIndex(activeIndex)} / {padIndex(TOTAL)}
+        </p>
+        <h2 className="text-[30px] font-normal text-[#302c2c] tracking-[-0.6px] leading-[1.1]">
+          {industries[activeIndex].industry}
+        </h2>
+        <div className="mt-5 flex items-baseline gap-[40px]">
+          <span className="text-[11px] font-medium text-content-primary">
+            Brand:
+          </span>
+          <span className="text-[11px] font-normal text-content-primary">
+            {industries[activeIndex].brand}
+          </span>
+        </div>
+        <p className="text-[11px] text-content-tertiary mt-1">0°</p>
       </div>
 
-      {/* FLIP transition overlay */}
-      {transition && (
-        <div className="fixed inset-0 z-40 pointer-events-none">
-          {/* Expanding footage */}
-          <div
-            style={{
-              position: "absolute",
-              left: expandPhase === "end" ? targetLeft : transition.fromRect.left,
-              top: expandPhase === "end" ? targetTop : transition.fromRect.top,
-              width: expandPhase === "end" ? targetWidth : transition.fromRect.width,
-              height: expandPhase === "end" ? targetHeight : transition.fromRect.height,
-              transition: `all ${EXPAND_DURATION}ms ${EASE}`,
-              willChange: "left, top, width, height",
-            }}
-          >
-            <Footage
-              item={industries[transition.index]}
-              startTime={transition.videoTime}
-              onVideoRef={(el) => {
-                if (el) {
-                  overlayVideoTimeRef.current = el.currentTime;
-                }
-              }}
-            />
-          </div>
+      {/* Persistent video/image layer — never unmounts */}
+      <div className="fixed inset-0 z-20">
+        {industries.map((item, index) => {
+          const grid = getGridPos(index);
+          const isActive = index === activeIndex;
 
-          {/* Industry info fading in */}
-          <div
-            className="absolute top-[160px] left-[41px]"
-            style={{
-              opacity: expandPhase === "end" ? 1 : 0,
-              transform: expandPhase === "end" ? "translateY(0)" : "translateY(20px)",
-              transition: `opacity ${EXPAND_DURATION * 0.6}ms ${EASE} ${EXPAND_DURATION * 0.4}ms, transform ${EXPAND_DURATION * 0.6}ms ${EASE} ${EXPAND_DURATION * 0.4}ms`,
-            }}
-          >
-            <p className="text-[11px] font-medium text-content-secondary tracking-wide mb-2">
-              Industry {padIndex(transition.index)} / {padIndex(TOTAL)}
-            </p>
-            <h2 className="text-[30px] font-normal text-[#302c2c] tracking-[-0.6px] leading-[1.1]">
-              {industries[transition.index].industry}
-            </h2>
-            <div className="mt-5 flex items-baseline gap-[40px]">
-              <span className="text-[11px] font-medium text-content-primary">
-                Brand:
-              </span>
-              <span className="text-[11px] font-normal text-content-primary">
-                {industries[transition.index].brand}
-              </span>
+          // In grid mode: show at grid position
+          // In list mode: active item at expanded pos, others hidden
+          const isExpanded = viewMode === "list";
+          const showExpanded = isExpanded && isActive;
+          const hidden = isExpanded && !isActive;
+
+          const pos = showExpanded ? expanded : grid;
+
+          return (
+            <div
+              key={item.id}
+              onClick={() => viewMode === "grid" && !isAnimating && handleExpand(index)}
+              style={{
+                position: "absolute",
+                left: pos.left,
+                top: pos.top,
+                width: pos.width,
+                height: pos.height,
+                opacity: hidden ? 0 : 1,
+                transition: `left ${DURATION}ms ${EASE}, top ${DURATION}ms ${EASE}, width ${DURATION}ms ${EASE}, height ${DURATION}ms ${EASE}, opacity ${hidden ? 300 : DURATION}ms ${EASE}`,
+                cursor: viewMode === "grid" ? "pointer" : "default",
+                pointerEvents: hidden ? "none" : "auto",
+                willChange: "left, top, width, height, opacity",
+              }}
+            >
+              {item.videoUrl ? (
+                <video
+                  src={item.videoUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-contain"
+                />
+              ) : item.image ? (
+                <div className="relative w-full h-full">
+                  <Image
+                    src={item.image}
+                    alt={item.industry}
+                    fill
+                    className="object-contain"
+                    sizes="70vw"
+                  />
+                </div>
+              ) : null}
             </div>
-            <p className="text-[11px] text-content-tertiary mt-1">0°</p>
-          </div>
-        </div>
-      )}
-      {/* Retract transition overlay */}
-      {retract && (
-        <div className="fixed inset-0 z-40 pointer-events-none">
-          <div
-            style={{
-              position: "absolute",
-              left: retractPhase === "end" ? retract.toRect.left : targetLeft,
-              top: retractPhase === "end" ? retract.toRect.top : targetTop,
-              width: retractPhase === "end" ? retract.toRect.width : targetWidth,
-              height: retractPhase === "end" ? retract.toRect.height : targetHeight,
-              transition: `all ${EXPAND_DURATION}ms ${EASE}`,
-              willChange: "left, top, width, height",
-            }}
-          >
-            <Footage item={industries[retract.index]} startTime={retract.videoTime} />
-          </div>
-        </div>
-      )}
+          );
+        })}
+      </div>
     </>
   );
 }
