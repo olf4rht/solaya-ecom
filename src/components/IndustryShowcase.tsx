@@ -140,7 +140,15 @@ export default function IndustryShowcase() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [winSize, setWinSize] = useState({ w: 1440, h: 900 });
   const scrollCooldown = useRef(false);
+
+  useEffect(() => {
+    const update = () => setWinSize({ w: window.innerWidth, h: window.innerHeight });
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   const padIndex = (i: number) => String(i + 1).padStart(2, "0");
 
@@ -149,27 +157,26 @@ export default function IndustryShowcase() {
     const size = 200;
     const gap = 16;
     const totalW = TOTAL * size + (TOTAL - 1) * gap;
-    const startX = (typeof window !== "undefined" ? window.innerWidth : 1440) / 2 - totalW / 2;
-    const startY = (typeof window !== "undefined" ? window.innerHeight : 900) / 2 - size / 2;
+    const startX = winSize.w / 2 - totalW / 2;
+    const startY = winSize.h / 2 - size / 2;
     return {
       left: startX + index * (size + gap),
       top: startY,
       width: size,
       height: size,
     };
-  }, []);
+  }, [winSize]);
 
-  // Expanded position: centered 70vw x 70vh
   const getExpandedPos = useCallback(() => {
-    const w = (typeof window !== "undefined" ? window.innerWidth : 1440) * 0.7;
-    const h = (typeof window !== "undefined" ? window.innerHeight : 900) * 0.7;
+    const w = winSize.w * 0.7;
+    const h = winSize.h * 0.7;
     return {
-      left: (typeof window !== "undefined" ? window.innerWidth : 1440) / 2 - w / 2,
-      top: (typeof window !== "undefined" ? window.innerHeight : 900) / 2 - h / 2,
+      left: winSize.w / 2 - w / 2,
+      top: winSize.h / 2 - h / 2,
       width: w,
       height: h,
     };
-  }, []);
+  }, [winSize]);
 
   const handleExpand = useCallback((index: number) => {
     if (isAnimating) return;
