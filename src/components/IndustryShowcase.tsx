@@ -2,64 +2,14 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { industries, TOTAL_INDUSTRIES } from "@/lib/industries";
+import Link from "next/link";
 
 type ViewMode = "list" | "grid";
 
-interface IndustrySection {
-  id: number;
-  industry: string;
-  brand: string;
-  videoUrl?: string;
-  image?: string;
-}
-
-const industries: IndustrySection[] = [
-  {
-    id: 1,
-    industry: "Food & Beverages",
-    brand: "Walmart",
-    videoUrl: "/assets/videos/01.mp4",
-  },
-  {
-    id: 2,
-    industry: "Art, Culture & Collectibles",
-    brand: "Sotheby's",
-    videoUrl: "/assets/videos/02.mp4",
-  },
-  {
-    id: 3,
-    industry: "Consumer Electronics",
-    brand: "Samsung",
-    videoUrl: "/assets/videos/03.mp4",
-  },
-  {
-    id: 4,
-    industry: "Cosmetics & Beauty",
-    brand: "Chanel",
-    videoUrl: "/assets/videos/04.mp4",
-  },
-  {
-    id: 5,
-    industry: "Fashion & Apparel",
-    brand: "Gucci",
-    videoUrl: "/assets/videos/05.mp4",
-  },
-  {
-    id: 6,
-    industry: "Furniture & Homeware",
-    brand: "IKEA",
-    videoUrl: "/assets/videos/06.mp4",
-  },
-  {
-    id: 7,
-    industry: "Manufacturing & Industrial Design",
-    brand: "Siemens",
-    image: "/assets/products/pink-sneaker.png",
-  },
-];
-
 const EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
-const TOTAL = industries.length;
+const TOTAL = TOTAL_INDUSTRIES;
 const DURATION = 700;
 
 function ListIcon() {
@@ -289,6 +239,12 @@ export default function IndustryShowcase() {
           </span>
         </div>
         <p className="text-[11px] text-content-tertiary mt-1">0°</p>
+        <Link
+          href={`/industry/${industries[activeIndex].slug}`}
+          className="inline-block mt-6 text-[11px] font-medium text-content-primary underline underline-offset-2 hover:opacity-70 transition-opacity"
+        >
+          View Industry
+        </Link>
       </div>
 
       {/* Persistent video/image layer — never unmounts */}

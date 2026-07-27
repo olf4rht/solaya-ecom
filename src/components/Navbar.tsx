@@ -3,21 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-
-const industries = [
-  "Food & Beverages",
-  "Art, Culture & Collectibles",
-  "Consumer Electronics",
-  "Cosmetics & Beauty",
-  "Fashion & Apparel",
-  "Furniture & Homeware",
-  "Manufacturing & Industrial Design",
-];
+import { useRouter } from "next/navigation";
+import { industries } from "@/lib/industries";
 
 export default function Navbar() {
   const [expanded, setExpanded] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const [listHeight, setListHeight] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     if (listRef.current) {
@@ -91,19 +84,17 @@ export default function Navbar() {
           }}
         >
           <div className="flex flex-wrap gap-x-[24px] gap-y-[6px] pt-[16px] pb-[6px]">
-            {industries.map((name, index) => (
+            {industries.map((item) => (
               <button
-                key={name}
+                key={item.id}
                 onClick={() => {
-                  window.dispatchEvent(
-                    new CustomEvent("selectIndustry", { detail: index })
-                  );
+                  router.push(`/industry/${item.slug}`);
                   setExpanded(false);
                 }}
                 className="text-[11px] font-medium hover:opacity-70 transition-opacity cursor-pointer"
                 style={{ color: "#BBBBB7" }}
               >
-                {name}
+                {item.industry}
               </button>
             ))}
           </div>
