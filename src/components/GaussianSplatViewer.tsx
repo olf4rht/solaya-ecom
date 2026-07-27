@@ -9,10 +9,11 @@ interface GaussianSplatViewerProps {
   fallbackAlt?: string;
   className?: string;
   style?: React.CSSProperties;
+  cameraPosition?: [number, number, number];
+  cameraLookAt?: [number, number, number];
 }
 
 // 130mm focal length on 35mm full-frame (24mm sensor height)
-// FOV = 2 * atan(sensorHeight / (2 * focalLength))
 const FOV_130MM = 2 * Math.atan(24 / (2 * 130)) * (180 / Math.PI); // ~10.5°
 
 function getProxiedUrl(url: string): string {
@@ -29,12 +30,23 @@ export default function GaussianSplatViewer({
   fallbackAlt = "",
   className = "",
   style,
+  cameraPosition = [-12, 0.3, 0],
+  cameraLookAt = [0, 0, 0],
 }: GaussianSplatViewerProps) {
   const outerRef = useRef<HTMLDivElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<unknown>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const controlsRef = useRef<{
+    target: THREE.Vector3;
+    enableZoom: boolean;
+    enablePan: boolean;
+    minDistance: number;
+    maxDistance: number;
+  } | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
 
+  // Load model — only depends on plyUrl
   useEffect(() => {
     if (!plyUrl || !canvasContainerRef.current || !outerRef.current) return;
 
@@ -53,21 +65,20 @@ export default function GaussianSplatViewer({
         const proxiedUrl = getProxiedUrl(plyUrl);
         console.log("[GS3D] Loading model from:", proxiedUrl);
 
-        // Create our own camera with 130mm equivalent FOV
         const w = container.offsetWidth || 600;
         const h = container.offsetHeight || 600;
         const camera = new THREE.PerspectiveCamera(FOV_130MM, w / h, 0.1, 1000);
-        // Position camera far enough to fit the whole model with narrow FOV
-        camera.position.set(-12, 0.3, 0);
-        camera.lookAt(0, 0, 0);
+        camera.position.set(...cameraPosition);
+        camera.lookAt(...cameraLookAt);
+        cameraRef.current = camera;
 
         const viewer = new GaussianSplats3D.Viewer({
           selfDrivenMode: true,
           useBuiltInControls: true,
           rootElement: container,
           camera: camera,
-          initialCameraLookAt: [0, 0, 0],
-          initialCameraPosition: [-12, 0.3, 0],
+          initialCameraLookAt: cameraLookAt,
+          initialCameraPosition: cameraPosition,
           ignoreDevicePixelRatio: false,
         });
 
@@ -89,29 +100,20 @@ export default function GaussianSplatViewer({
 
         await viewer.start();
 
-        // After loading: disable zoom/pan, compute center of gravity
         try {
           const viewerAny = viewer as unknown as Record<string, unknown>;
 
-          // Disable zoom and pan — rotation only
-          const controls = viewerAny.controls as {
-            target: THREE.Vector3;
-            enableZoom: boolean;
-            enablePan: boolean;
-            minDistance: number;
-            maxDistance: number;
-          } | undefined;
+          const controls = viewerAny.controls as typeof controlsRef.current;
 
           if (controls) {
             controls.enableZoom = false;
             controls.enablePan = false;
-            // Lock distance so scroll can't change it
             const currentDist = camera.position.length();
             controls.minDistance = currentDist;
             controls.maxDistance = currentDist;
+            controlsRef.current = controls;
           }
 
-          // Compute center of gravity and re-target orbit
           const splatMesh = viewerAny.splatMesh as {
             getSplatCenter: (index: number, out: THREE.Vector3) => void;
             getSplatCount: () => number;
@@ -128,8 +130,6 @@ export default function GaussianSplatViewer({
             }
             center.divideScalar(count);
 
-            console.log("[GS3D] Center of gravity:", center.x.toFixed(3), center.y.toFixed(3), center.z.toFixed(3));
-
             if (controls) {
               controls.target.copy(center);
             }
@@ -139,7 +139,6 @@ export default function GaussianSplatViewer({
           console.warn("[GS3D] Could not configure controls:", e);
         }
 
-        console.log("[GS3D] Model loaded — FOV:", FOV_130MM.toFixed(1) + "°");
         setStatus("ready");
       } catch (err) {
         console.error("[GS3D] Failed to load:", err);
@@ -151,6 +150,8 @@ export default function GaussianSplatViewer({
 
     return () => {
       disposed = true;
+      cameraRef.current = null;
+      controlsRef.current = null;
       if (viewerRef.current) {
         try {
           (viewerRef.current as { dispose: () => void }).dispose();
@@ -163,7 +164,22 @@ export default function GaussianSplatViewer({
         canvasContainerRef.current.innerHTML = "";
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plyUrl]);
+
+  // Update camera position/lookAt live without reloading the model
+  useEffect(() => {
+    const camera = cameraRef.current;
+    if (!camera) return;
+    camera.position.set(...cameraPosition);
+    camera.lookAt(...cameraLookAt);
+    if (controlsRef.current) {
+      controlsRef.current.target.set(...cameraLookAt);
+      const dist = camera.position.length();
+      controlsRef.current.minDistance = dist;
+      controlsRef.current.maxDistance = dist;
+    }
+  }, [cameraPosition, cameraLookAt]);
 
   if (!plyUrl) {
     return (
