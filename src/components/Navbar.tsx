@@ -53,7 +53,7 @@ export default function Navbar() {
             >
               Industry
             </button>
-            <div className="ml-auto flex items-center gap-[24px]">
+            <div className="ml-auto flex items-center gap-[40px]">
               <button
                 className="hover:opacity-70 transition-opacity cursor-pointer"
                 style={{
