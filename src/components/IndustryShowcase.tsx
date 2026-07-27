@@ -279,6 +279,20 @@ export default function IndustryShowcase() {
     <>
       <ViewToggle viewMode={viewMode} onChange={handleViewChange} />
 
+      {/* Close button — fixed top right, list view only */}
+      {viewMode === "list" && !retract && (
+        <button
+          onClick={handleClose}
+          className="fixed top-[200px] right-[41px] z-50 cursor-pointer"
+          style={{
+            opacity: 1,
+            transition: `opacity 400ms ${EASE}`,
+          }}
+        >
+          <CloseIcon />
+        </button>
+      )}
+
       <div
         className="w-full"
         style={{
@@ -367,19 +381,6 @@ export default function IndustryShowcase() {
                   >
                     <Footage item={item} />
                   </div>
-
-                  {/* Close button — top right */}
-                  <button
-                    onClick={handleClose}
-                    className="absolute top-[200px] right-[41px] cursor-pointer"
-                    style={{
-                      opacity: isActive && !retract ? 1 : 0,
-                      transition: `opacity 400ms ${EASE}`,
-                      pointerEvents: isActive && !retract ? "auto" : "none",
-                    }}
-                  >
-                    <CloseIcon />
-                  </button>
 
                   {/* Industry info — top left */}
                   <div
