@@ -256,7 +256,7 @@ export default function IndustryShowcase() {
                   style={{
                     width: "200px",
                     height: "200px",
-                    opacity: transition && transition.index !== index ? 0 : 1,
+                    opacity: transition ? 0 : 1,
                     transition: transition ? `opacity 300ms ${EASE}` : "none",
                   }}
                 >
