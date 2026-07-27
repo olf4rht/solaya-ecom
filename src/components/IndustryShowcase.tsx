@@ -86,6 +86,22 @@ function GridIcon() {
   );
 }
 
+function CloseIcon() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g clipPath="url(#clip0_146_543)">
+        <path d="M18.3216 0.678467L0.678711 18.3213" stroke="#767670" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M0.678711 0.678467L18.3216 18.3213" stroke="#767670" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </g>
+      <defs>
+        <clipPath id="clip0_146_543">
+          <rect width="19" height="19" fill="white"/>
+        </clipPath>
+      </defs>
+    </svg>
+  );
+}
+
 function ViewToggle({
   viewMode,
   onChange,
@@ -153,6 +169,8 @@ export default function IndustryShowcase() {
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [transition, setTransition] = useState<TransitionState | null>(null);
   const [expandPhase, setExpandPhase] = useState<"start" | "end" | null>(null);
+  const [retract, setRetract] = useState<{ index: number; toRect: { left: number; top: number; width: number; height: number } } | null>(null);
+  const [retractPhase, setRetractPhase] = useState<"start" | "end" | null>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const gridItemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -224,6 +242,30 @@ export default function IndustryShowcase() {
       });
     }, EXPAND_DURATION);
   }, []);
+
+  const handleClose = useCallback(() => {
+    const gridItemSize = 200;
+    const gap = 16;
+    const totalWidth = TOTAL * gridItemSize + (TOTAL - 1) * gap;
+    const startLeft = (window.innerWidth - totalWidth) / 2;
+    const itemLeft = startLeft + activeIndex * (gridItemSize + gap);
+    const itemTop = (window.innerHeight - gridItemSize) / 2;
+
+    setRetract({ index: activeIndex, toRect: { left: itemLeft, top: itemTop, width: gridItemSize, height: gridItemSize } });
+    setRetractPhase("start");
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setRetractPhase("end");
+      });
+    });
+
+    setTimeout(() => {
+      setViewMode("grid");
+      setRetract(null);
+      setRetractPhase(null);
+    }, EXPAND_DURATION);
+  }, [activeIndex]);
 
   const padIndex = (i: number) => String(i + 1).padStart(2, "0");
 
@@ -315,7 +357,7 @@ export default function IndustryShowcase() {
                     className="flex items-center justify-center"
                     style={{
                       transform: isActive ? "scale(1)" : "scale(0.5)",
-                      opacity: isActive ? 1 : 0.5,
+                      opacity: retract && retract.index === index ? 0 : (isActive ? 1 : 0.5),
                       transition: `transform 800ms ${EASE}, opacity 800ms ${EASE}`,
                       willChange: "transform, opacity",
                       width: "70vw",
@@ -326,12 +368,25 @@ export default function IndustryShowcase() {
                     <Footage item={item} />
                   </div>
 
+                  {/* Close button — top right */}
+                  <button
+                    onClick={handleClose}
+                    className="absolute top-[200px] right-[41px] cursor-pointer"
+                    style={{
+                      opacity: isActive && !retract ? 1 : 0,
+                      transition: `opacity 400ms ${EASE}`,
+                      pointerEvents: isActive && !retract ? "auto" : "none",
+                    }}
+                  >
+                    <CloseIcon />
+                  </button>
+
                   {/* Industry info — top left */}
                   <div
                     className="absolute top-[160px] left-[41px]"
                     style={{
-                      opacity: isActive ? 1 : 0,
-                      transform: isActive
+                      opacity: isActive && !retract ? 1 : 0,
+                      transform: isActive && !retract
                         ? "translateY(0)"
                         : "translateY(12px)",
                       transition: `opacity 600ms ${EASE} 200ms, transform 600ms ${EASE} 200ms`,
@@ -402,6 +457,24 @@ export default function IndustryShowcase() {
               </span>
             </div>
             <p className="text-[11px] text-content-tertiary mt-1">0°</p>
+          </div>
+        </div>
+      )}
+      {/* Retract transition overlay */}
+      {retract && (
+        <div className="fixed inset-0 z-40 pointer-events-none">
+          <div
+            style={{
+              position: "absolute",
+              left: retractPhase === "end" ? retract.toRect.left : targetLeft,
+              top: retractPhase === "end" ? retract.toRect.top : targetTop,
+              width: retractPhase === "end" ? retract.toRect.width : targetWidth,
+              height: retractPhase === "end" ? retract.toRect.height : targetHeight,
+              transition: `all ${EXPAND_DURATION}ms ${EASE}`,
+              willChange: "left, top, width, height",
+            }}
+          >
+            <Footage item={industries[retract.index]} />
           </div>
         </div>
       )}
