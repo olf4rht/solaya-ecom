@@ -97,12 +97,11 @@ export default function GaussianSplatViewer({
 
         viewerRef.current = viewer;
 
-        const quat = eulerDegreesToQuat(objectRotation);
         await viewer.addSplatScene(proxiedUrl, {
           splatAlphaRemovalThreshold: 5,
           showLoadingUI: false,
           position: [0, 0, 0],
-          rotation: quat,
+          rotation: [1, 0, 0, 0],
           scale: [1, 1, 1],
           format: 2,
         });
@@ -135,6 +134,13 @@ export default function GaussianSplatViewer({
 
           if (splatMesh) {
             splatMeshRef.current = splatMesh;
+            // Apply initial rotation via mesh quaternion (same path as live updates)
+            const euler = new THREE.Euler(
+              objectRotation[0] * Math.PI / 180,
+              objectRotation[1] * Math.PI / 180,
+              objectRotation[2] * Math.PI / 180,
+            );
+            splatMesh.quaternion.setFromEuler(euler);
           }
 
           // Use provided lookAt instead of computing center of gravity

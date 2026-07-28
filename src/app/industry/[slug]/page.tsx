@@ -19,7 +19,7 @@ export default function IndustryPage() {
   const [showControls, setShowControls] = useState(false);
   const [camPos, setCamPos] = useState<[number, number, number]>([-12, 0.3, 0]);
   const [camLookAt, setCamLookAt] = useState<[number, number, number]>([0, 0, 0]);
-  const [objRotation, setObjRotation] = useState<[number, number, number]>([0, 0, 25]);
+  const [objRotation, setObjRotation] = useState<[number, number, number]>([0, 0, 0]);
 
   const currentIndex = industries.findIndex((item) => item.slug === slug);
   const industry = industries[currentIndex];
