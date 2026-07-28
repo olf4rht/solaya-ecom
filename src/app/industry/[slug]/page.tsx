@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { industries, TOTAL_INDUSTRIES } from "@/lib/industries";
@@ -9,6 +9,16 @@ import Navbar from "@/components/Navbar";
 
 const PLY_URL = "/assets/models/white-nike-airforce.ply";
 const FALLBACK_IMAGE = "/assets/products/pink-sneaker.png";
+
+// Prefetch the model file so browser cache is warm before viewers init
+if (typeof window !== "undefined") {
+  const link = document.createElement("link");
+  link.rel = "prefetch";
+  link.href = PLY_URL;
+  link.as = "fetch";
+  link.crossOrigin = "anonymous";
+  document.head.appendChild(link);
+}
 
 function padIndex(i: number) {
   return String(i + 1).padStart(2, "0");
@@ -84,6 +94,7 @@ export default function IndustryPage() {
                 cameraPosition={camPos}
                 cameraLookAt={camLookAt}
                 objectRotation={objRotation}
+                delay={i * 200}
                 style={{ width: "100%", height: "100%" }}
               />
               {/* Hover overlay */}

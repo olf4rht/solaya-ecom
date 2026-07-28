@@ -12,6 +12,7 @@ interface GaussianSplatViewerProps {
   cameraPosition?: [number, number, number];
   cameraLookAt?: [number, number, number];
   objectRotation?: [number, number, number]; // Euler degrees [x, y, z]
+  delay?: number; // ms delay before loading (for staggering)
 }
 
 function eulerDegreesToQuat(degrees: [number, number, number]): [number, number, number, number] {
@@ -44,6 +45,7 @@ export default function GaussianSplatViewer({
   cameraPosition = [-12, 0.3, 0],
   cameraLookAt = [0, 0, 0],
   objectRotation = [0, 0, 0],
+  delay = 0,
 }: GaussianSplatViewerProps) {
   const outerRef = useRef<HTMLDivElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -176,9 +178,10 @@ export default function GaussianSplatViewer({
       }
     };
 
-    init();
+    const timer = setTimeout(init, delay);
 
     return () => {
+      clearTimeout(timer);
       disposed = true;
       cameraRef.current = null;
       controlsRef.current = null;
