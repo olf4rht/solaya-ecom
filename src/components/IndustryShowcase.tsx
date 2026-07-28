@@ -221,7 +221,7 @@ export default function IndustryShowcase() {
           opacity: viewMode === "list" && !isAnimating ? 1 : 0,
           transform: viewMode === "list" && !isAnimating ? "translateY(0)" : "translateY(12px)",
           transition: `opacity 500ms ${EASE} ${viewMode === "list" ? "300ms" : "0ms"}, transform 500ms ${EASE} ${viewMode === "list" ? "300ms" : "0ms"}`,
-          pointerEvents: "none",
+          pointerEvents: viewMode === "list" && !isAnimating ? "auto" : "none",
         }}
       >
         <p className="text-[11px] font-medium text-content-secondary tracking-wide mb-2">
