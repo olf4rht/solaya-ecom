@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { industries, TOTAL_INDUSTRIES } from "@/lib/industries";
@@ -10,16 +10,6 @@ import CtaButton from "@/components/CtaButton";
 
 const PLY_URL = "/assets/models/white-nike-airforce.ply";
 const FALLBACK_IMAGE = "/assets/products/white-nike-airforce.png";
-
-// Preload the model file (high priority) so the shared cache starts immediately
-if (typeof window !== "undefined") {
-  const link = document.createElement("link");
-  link.rel = "preload";
-  link.href = PLY_URL;
-  link.as = "fetch";
-  link.crossOrigin = "anonymous";
-  document.head.appendChild(link);
-}
 
 function padIndex(i: number) {
   return String(i + 1).padStart(2, "0");

@@ -27,25 +27,6 @@ function getProxiedUrl(url: string): string {
   return url;
 }
 
-// Shared model cache: fetch once, reuse blob URL across all viewers
-const modelCache = new Map<string, Promise<string>>();
-
-function getSharedModelUrl(url: string): Promise<string> {
-  const proxied = getProxiedUrl(url);
-  const existing = modelCache.get(proxied);
-  if (existing) return existing;
-
-  const promise = fetch(proxied)
-    .then((res) => {
-      if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
-      return res.blob();
-    })
-    .then((blob) => URL.createObjectURL(blob));
-
-  modelCache.set(proxied, promise);
-  return promise;
-}
-
 export default function GaussianSplatViewer({
   plyUrl,
   fallbackImage,
@@ -84,12 +65,11 @@ export default function GaussianSplatViewer({
       if (!container) return;
 
       try {
-        const [GaussianSplats3D, blobUrl] = await Promise.all([
-          import("@mkkellogg/gaussian-splats-3d"),
-          getSharedModelUrl(plyUrl),
-        ]);
+        const GaussianSplats3D = await import("@mkkellogg/gaussian-splats-3d");
 
         if (disposed) return;
+
+        const proxiedUrl = getProxiedUrl(plyUrl);
 
         const w = container.offsetWidth || 600;
         const h = container.offsetHeight || 600;
@@ -121,7 +101,7 @@ export default function GaussianSplatViewer({
           }
         } catch { /* controls may not exist yet */ }
 
-        await viewer.addSplatScene(blobUrl, {
+        await viewer.addSplatScene(proxiedUrl, {
           splatAlphaRemovalThreshold: 5,
           showLoadingUI: false,
           position: [0, 0, 0],
