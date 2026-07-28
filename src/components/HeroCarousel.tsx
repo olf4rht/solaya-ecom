@@ -20,7 +20,7 @@ const SOLAYA_MODEL_URL =
   "https://assets-bear.solaya-app.com/root-bear/models/420__company_82_None_product_545_model_oriented.compressed.ply?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9hc3NldHMtYmVhci5zb2xheWEtYXBwLmNvbS9yb290LWJlYXIvbW9kZWxzLzQyMF9fY29tcGFueV84Ml9Ob25lX3Byb2R1Y3RfNTQ1X21vZGVsX29yaWVudGVkLmNvbXByZXNzZWQucGx5IiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxODE0NjIxMjk3fX19XX0_&Signature=6Gb5dBadoA5guHbKQcQifq281MDxtQS-6Xuan1L6qJuESJl2wqqX9UAWl0-CKwNWpDL1KYOevjBI9me1TSc0myyfM5QVuLQYdfxUn5Vog~V8XwfAqlApD-wMuN7pcMt6S8hsRZ7exsetfDeaOtZkccPLilwBbg2vjtldiPkKxQPXJRSpaoQdasq0jzKMmHPXFhKITbDRPTsNbIg073889yu93y9TwXwPOVbsgtgUKDhCIEopcfD06-vl2b1DPqeCU1fXBxLU11Vxwkub4gqrs0SA6Drc1FRxg9bHCE56lGu4FfUbdKqOzI-AsL9GkzMsQv8~D780neGugsgrJKOZLg__&Key-Pair-Id=K6R3RR2IEZRM4";
 
 const heroItems: HeroItem[] = [
-  { id: 1, image: "/assets/products/pink-sneaker.png", label: "Pink Sneaker", client: "Aubsas", industry: "Footwear", plyUrl: "/assets/models/pink-sneaker.ply", videoUrl: "/assets/videos/01.mp4" },
+  { id: 1, image: "/assets/products/pink-sneaker.png", label: "Pink Sneaker", client: "Aubsas", industry: "Footwear", plyUrl: "/assets/models/white-nike-airforce.ply", videoUrl: "/assets/videos/01.mp4" },
   { id: 2, image: "/assets/products/detail-thumb-5.png", label: "Crystal Bottle", client: "Maison Lumière", industry: "Beauty", videoUrl: "/assets/videos/02.mp4" },
   { id: 3, image: "/assets/products/product-20.png", label: "Designer Bag", client: "Atelier Noir", industry: "Fashion", videoUrl: "/assets/videos/03.mp4" },
   { id: 4, image: "/assets/products/product-17.png", label: "Hobo Bag", client: "Casa Moda", industry: "Fashion", videoUrl: "/assets/videos/04.mp4" },

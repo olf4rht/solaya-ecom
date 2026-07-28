@@ -7,7 +7,7 @@ import { industries, TOTAL_INDUSTRIES } from "@/lib/industries";
 import GaussianSplatViewer from "@/components/GaussianSplatViewer";
 import Navbar from "@/components/Navbar";
 
-const PLY_URL = "/assets/models/pink-sneaker.ply";
+const PLY_URL = "/assets/models/white-nike-airforce.ply";
 const FALLBACK_IMAGE = "/assets/products/pink-sneaker.png";
 
 function padIndex(i: number) {
