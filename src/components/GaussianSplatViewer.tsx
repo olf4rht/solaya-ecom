@@ -59,15 +59,6 @@ export default function GaussianSplatViewer({
   const splatMeshRef = useRef<THREE.Object3D | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
 
-  // Block wheel events from reaching GS3D controls (zoom) but allow page scroll
-  useEffect(() => {
-    const container = canvasContainerRef.current;
-    if (!container) return;
-    const blockWheel = (e: WheelEvent) => e.stopPropagation();
-    container.addEventListener("wheel", blockWheel, { passive: true });
-    return () => container.removeEventListener("wheel", blockWheel);
-  }, []);
-
   // Load model — only depends on plyUrl
   useEffect(() => {
     if (!plyUrl || !canvasContainerRef.current || !outerRef.current) return;
@@ -106,6 +97,17 @@ export default function GaussianSplatViewer({
 
         viewerRef.current = viewer;
 
+        // Disable zoom/pan immediately before loading to prevent race conditions
+        try {
+          const viewerAny = viewer as unknown as Record<string, unknown>;
+          const controls = viewerAny.controls as typeof controlsRef.current;
+          if (controls) {
+            controls.enableZoom = false;
+            controls.enablePan = false;
+            controlsRef.current = controls;
+          }
+        } catch { /* controls may not exist yet */ }
+
         await viewer.addSplatScene(proxiedUrl, {
           splatAlphaRemovalThreshold: 5,
           showLoadingUI: false,
@@ -121,6 +123,12 @@ export default function GaussianSplatViewer({
         }
 
         await viewer.start();
+
+        // Block wheel on the GS3D canvas so zoom never fires, page scroll unaffected
+        const canvas = container.querySelector("canvas");
+        if (canvas) {
+          canvas.addEventListener("wheel", (e) => e.stopImmediatePropagation(), { capture: true });
+        }
 
         try {
           const viewerAny = viewer as unknown as Record<string, unknown>;
