@@ -59,6 +59,15 @@ export default function GaussianSplatViewer({
   const splatMeshRef = useRef<THREE.Object3D | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
 
+  // Block wheel events to prevent any zoom changes
+  useEffect(() => {
+    const container = canvasContainerRef.current;
+    if (!container) return;
+    const blockWheel = (e: WheelEvent) => e.preventDefault();
+    container.addEventListener("wheel", blockWheel, { passive: false });
+    return () => container.removeEventListener("wheel", blockWheel);
+  }, []);
+
   // Load model — only depends on plyUrl
   useEffect(() => {
     if (!plyUrl || !canvasContainerRef.current || !outerRef.current) return;
