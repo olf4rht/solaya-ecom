@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { getMockProduct, allProducts } from "@/lib/mock-data";
+import { getMockProduct, allProducts, type MockProduct } from "@/lib/mock-data";
 import Navbar from "@/components/Navbar";
 import ProductGrid from "@/components/ProductGrid";
 import Footer from "@/components/Footer";
@@ -12,29 +12,29 @@ import Footer from "@/components/Footer";
 export default function ProductPage() {
   const params = useParams();
   const handle = params.handle as string;
-  const product = getMockProduct(handle);
+  const existing = getMockProduct(handle);
+  const product: MockProduct = existing ?? {
+    id: handle,
+    title: handle.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
+    handle,
+    description: "This is a fictitious product page created by Solaya for demo purposes.",
+    category: "Product",
+    categoryHandle: "product",
+    image: "/assets/products/pink-sneaker.png",
+    detailImages: [
+      "/assets/products/detail-main.png",
+      "/assets/products/detail-thumb-2.png",
+      "/assets/products/detail-thumb-3.png",
+      "/assets/products/detail-thumb-4.png",
+      "/assets/products/detail-thumb-5.png",
+    ],
+    scans: 5,
+    hasIntegrations: true,
+    hasExtensions: true,
+    hasPlyFile: true,
+    commercialUsage: true,
+  };
   const [selectedImage, setSelectedImage] = useState(0);
-
-  if (!product) {
-    return (
-      <div className="bg-bg-primary min-h-screen">
-        <Navbar />
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <div className="text-center">
-            <h1 className="mb-4 text-[32px] font-normal text-content-primary">
-              Product not found
-            </h1>
-            <Link
-              href="/"
-              className="text-[13px] text-content-secondary underline hover:text-content-primary"
-            >
-              Back to catalog
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const features: { icon: string; label: string; underline?: boolean }[] = [
     { icon: "/assets/icons/scans.svg", label: `${product.scans} scans` },
