@@ -46,7 +46,7 @@ export default function IndustryPage() {
   const products = industry.products;
 
   return (
-    <div className="relative min-h-screen bg-white">
+    <div className="relative min-h-screen bg-bg-primary">
       <Navbar />
 
       {/* Industry info — top left */}
