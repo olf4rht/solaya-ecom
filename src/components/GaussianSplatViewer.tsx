@@ -59,12 +59,12 @@ export default function GaussianSplatViewer({
   const splatMeshRef = useRef<THREE.Object3D | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
 
-  // Block wheel events to prevent any zoom changes
+  // Block wheel events from reaching GS3D controls (zoom) but allow page scroll
   useEffect(() => {
     const container = canvasContainerRef.current;
     if (!container) return;
-    const blockWheel = (e: WheelEvent) => e.preventDefault();
-    container.addEventListener("wheel", blockWheel, { passive: false });
+    const blockWheel = (e: WheelEvent) => e.stopPropagation();
+    container.addEventListener("wheel", blockWheel, { passive: true });
     return () => container.removeEventListener("wheel", blockWheel);
   }, []);
 
