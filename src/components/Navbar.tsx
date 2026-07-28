@@ -37,6 +37,15 @@ export default function Navbar() {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none" style={{ height: expanded ? "300px" : "140px" }}>
+      {/* Try Solaya CTA — top right */}
+      <a
+        href="https://solaya.app"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute right-[41px] top-[26px] pointer-events-auto inline-flex items-center justify-center h-[38px] px-[20px] rounded-[12px] bg-[#2A2A27] text-[12px] font-medium text-white tracking-[0.2px] hover:bg-[#3a3a37] transition-colors"
+      >
+        Download Solaya
+      </a>
       <div
         className="bg-white flex flex-col items-start left-[41px] px-[14px] py-[9px] rounded-[20px] top-[26px] absolute pointer-events-auto"
         style={{
@@ -103,7 +112,7 @@ export default function Navbar() {
             width: "100%",
           }}
         >
-          <div className="flex flex-wrap gap-x-[24px] gap-y-[6px] pt-[16px] pb-[6px]">
+          <div className="flex flex-col items-start gap-[6px] pt-[16px] pb-[6px] w-full">
             {industries.map((item, index) => (
               <button
                 key={item.id}
@@ -112,7 +121,7 @@ export default function Navbar() {
                   setExpanded(false);
                   setHoveredIndex(null);
                 }}
-                className="text-[11px] font-medium hover:opacity-70 transition-opacity cursor-pointer"
+                className="text-[11px] font-medium hover:opacity-70 transition-opacity cursor-pointer text-left"
                 style={{
                   color: "#BBBBB7",
                   opacity: hoveredIndex !== null ? (index === hoveredIndex ? 1 : 0.3) : 1,

@@ -13,16 +13,7 @@ interface GaussianSplatViewerProps {
   cameraLookAt?: [number, number, number];
   objectRotation?: [number, number, number]; // Euler degrees [x, y, z]
   delay?: number; // ms delay before loading (for staggering)
-}
-
-function eulerDegreesToQuat(degrees: [number, number, number]): [number, number, number, number] {
-  const euler = new THREE.Euler(
-    degrees[0] * Math.PI / 180,
-    degrees[1] * Math.PI / 180,
-    degrees[2] * Math.PI / 180,
-  );
-  const q = new THREE.Quaternion().setFromEuler(euler);
-  return [q.w, q.x, q.y, q.z];
+  lowDpr?: boolean; // use lower device pixel ratio for grid thumbnails
 }
 
 // 130mm focal length on 35mm full-frame (24mm sensor height)
@@ -36,6 +27,25 @@ function getProxiedUrl(url: string): string {
   return url;
 }
 
+// Shared model cache: fetch once, reuse blob URL across all viewers
+const modelCache = new Map<string, Promise<string>>();
+
+function getSharedModelUrl(url: string): Promise<string> {
+  const proxied = getProxiedUrl(url);
+  const existing = modelCache.get(proxied);
+  if (existing) return existing;
+
+  const promise = fetch(proxied)
+    .then((res) => {
+      if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+      return res.blob();
+    })
+    .then((blob) => URL.createObjectURL(blob));
+
+  modelCache.set(proxied, promise);
+  return promise;
+}
+
 export default function GaussianSplatViewer({
   plyUrl,
   fallbackImage,
@@ -46,6 +56,7 @@ export default function GaussianSplatViewer({
   cameraLookAt = [0, 0, 0],
   objectRotation = [0, 0, 0],
   delay = 0,
+  lowDpr = false,
 }: GaussianSplatViewerProps) {
   const outerRef = useRef<HTMLDivElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -73,12 +84,12 @@ export default function GaussianSplatViewer({
       if (!container) return;
 
       try {
-        const GaussianSplats3D = await import("@mkkellogg/gaussian-splats-3d");
+        const [GaussianSplats3D, blobUrl] = await Promise.all([
+          import("@mkkellogg/gaussian-splats-3d"),
+          getSharedModelUrl(plyUrl),
+        ]);
 
         if (disposed) return;
-
-        const proxiedUrl = getProxiedUrl(plyUrl);
-        console.log("[GS3D] Loading model from:", proxiedUrl);
 
         const w = container.offsetWidth || 600;
         const h = container.offsetHeight || 600;
@@ -94,7 +105,7 @@ export default function GaussianSplatViewer({
           camera: camera,
           initialCameraLookAt: cameraLookAt,
           initialCameraPosition: cameraPosition,
-          ignoreDevicePixelRatio: false,
+          ignoreDevicePixelRatio: lowDpr,
         });
 
         viewerRef.current = viewer;
@@ -110,7 +121,7 @@ export default function GaussianSplatViewer({
           }
         } catch { /* controls may not exist yet */ }
 
-        await viewer.addSplatScene(proxiedUrl, {
+        await viewer.addSplatScene(blobUrl, {
           splatAlphaRemovalThreshold: 5,
           showLoadingUI: false,
           position: [0, 0, 0],

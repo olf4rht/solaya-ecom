@@ -6,14 +6,15 @@ import Link from "next/link";
 import { industries, TOTAL_INDUSTRIES } from "@/lib/industries";
 import GaussianSplatViewer from "@/components/GaussianSplatViewer";
 import Navbar from "@/components/Navbar";
+import CtaButton from "@/components/CtaButton";
 
 const PLY_URL = "/assets/models/white-nike-airforce.ply";
 const FALLBACK_IMAGE = "/assets/products/white-nike-airforce.png";
 
-// Prefetch the model file so browser cache is warm before viewers init
+// Preload the model file (high priority) so the shared cache starts immediately
 if (typeof window !== "undefined") {
   const link = document.createElement("link");
-  link.rel = "prefetch";
+  link.rel = "preload";
   link.href = PLY_URL;
   link.as = "fetch";
   link.crossOrigin = "anonymous";
@@ -94,7 +95,8 @@ export default function IndustryPage() {
                 cameraPosition={camPos}
                 cameraLookAt={camLookAt}
                 objectRotation={objRotation}
-                delay={i * 200}
+                delay={i * 100}
+                lowDpr
                 style={{ width: "100%", height: "100%" }}
               />
               {/* Hover overlay */}
@@ -132,6 +134,16 @@ export default function IndustryPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* CTA Section */}
+      <div style={{ padding: "0 41px 60px 41px" }} className="flex items-center gap-[16px]">
+        <CtaButton href="https://solaya.app" external>
+          Download Solaya
+        </CtaButton>
+        <CtaButton href="https://solaya.app/contact" external className="bg-transparent !text-[#2A2A27] border border-[#2A2A27] hover:!bg-[#2A2A27] hover:!text-white">
+          Book a Demo
+        </CtaButton>
       </div>
 
       {/* Footer */}

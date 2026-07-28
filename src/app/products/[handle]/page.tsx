@@ -8,6 +8,7 @@ import { getMockProduct, allProducts, type MockProduct } from "@/lib/mock-data";
 import Navbar from "@/components/Navbar";
 import ProductGrid from "@/components/ProductGrid";
 import Footer from "@/components/Footer";
+import CtaButton from "@/components/CtaButton";
 
 export default function ProductPage() {
   const params = useParams();
@@ -144,12 +145,36 @@ export default function ProductPage() {
                 </div>
               ))}
             </div>
+
+            <div className="flex items-center gap-[12px] mt-2">
+              <CtaButton href="https://solaya.app" external>
+                Test in Solaya Play
+              </CtaButton>
+              <CtaButton href="https://solaya.app/contact" external className="bg-transparent !text-[#2A2A27] border border-[#2A2A27] hover:!bg-[#2A2A27] hover:!text-white">
+                Contact Sales
+              </CtaButton>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Product grid */}
       <ProductGrid products={allProducts} />
+
+      {/* CTA Banner */}
+      <div className="w-full px-[41px] py-[60px] flex flex-col items-center gap-[16px]">
+        <p className="text-[13px] text-content-secondary text-center max-w-[400px]">
+          Create photorealistic 3D scans of any product in minutes. No studio, no equipment — just your phone.
+        </p>
+        <div className="flex items-center gap-[12px]">
+          <CtaButton href="https://solaya.app" external>
+            Get Started with Solaya
+          </CtaButton>
+          <CtaButton href="https://solaya.app/blog" external className="bg-transparent !text-[#2A2A27] border border-[#2A2A27] hover:!bg-[#2A2A27] hover:!text-white">
+            Read Our Blog
+          </CtaButton>
+        </div>
+      </div>
 
       {/* Footer */}
       <Footer />
