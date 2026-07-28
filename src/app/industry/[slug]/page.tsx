@@ -8,7 +8,7 @@ import GaussianSplatViewer from "@/components/GaussianSplatViewer";
 import Navbar from "@/components/Navbar";
 
 const PLY_URL = "/assets/models/white-nike-airforce.ply";
-const FALLBACK_IMAGE = "/assets/products/pink-sneaker.png";
+const FALLBACK_IMAGE = "/assets/products/white-nike-airforce.png";
 
 // Prefetch the model file so browser cache is warm before viewers init
 if (typeof window !== "undefined") {
