@@ -37,7 +37,7 @@ export default function IndustryPage() {
       <Navbar />
 
       {/* Industry info — top left */}
-      <div style={{ paddingTop: "130px", paddingLeft: "41px", paddingRight: "41px" }}>
+      <div style={{ paddingTop: "200px", paddingLeft: "41px", paddingRight: "41px" }}>
         <p className="text-[11px] font-medium text-content-secondary tracking-wide mb-2">
           Industry {padIndex(currentIndex)} / {padIndex(TOTAL_INDUSTRIES)}
         </p>
@@ -150,7 +150,7 @@ export default function IndustryPage() {
       {/* 3x2 Grid of .ply viewers */}
       <div
         style={{
-          margin: "30px 41px 80px 41px",
+          margin: "60px 41px 80px 41px",
           aspectRatio: "3 / 2",
         }}
       >
