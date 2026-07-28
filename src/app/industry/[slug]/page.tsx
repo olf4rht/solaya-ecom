@@ -150,7 +150,7 @@ export default function IndustryPage() {
       {/* 3x2 Grid of .ply viewers */}
       <div
         style={{
-          margin: "60px 41px 80px 41px",
+          margin: "60px 0 80px 0",
           aspectRatio: "3 / 2",
         }}
       >
