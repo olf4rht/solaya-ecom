@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { industries, TOTAL_INDUSTRIES } from "@/lib/industries";
 import GaussianSplatViewer from "@/components/GaussianSplatViewer";
 import Navbar from "@/components/Navbar";
@@ -15,6 +17,7 @@ function padIndex(i: number) {
 export default function IndustryPage() {
   const params = useParams();
   const slug = params.slug as string;
+  const [hoveredCell, setHoveredCell] = useState<number | null>(null);
   const camPos: [number, number, number] = [-12, 0.3, 0];
   const camLookAt: [number, number, number] = [0, 0, 0];
   const objRotation: [number, number, number] = [-2, 0, 34];
@@ -29,6 +32,8 @@ export default function IndustryPage() {
       </div>
     );
   }
+
+  const products = industry.products;
 
   return (
     <div className="relative min-h-screen bg-white">
@@ -61,9 +66,11 @@ export default function IndustryPage() {
             border: "1px solid #e5e5e0",
           }}
         >
-          {Array.from({ length: 6 }).map((_, i) => (
+          {products.map((product, i) => (
             <div
               key={i}
+              onMouseEnter={() => setHoveredCell(i)}
+              onMouseLeave={() => setHoveredCell(null)}
               style={{
                 borderRight: (i % 3) < 2 ? "1px solid #e5e5e0" : "none",
                 borderBottom: i < 3 ? "1px solid #e5e5e0" : "none",
@@ -73,12 +80,44 @@ export default function IndustryPage() {
               <GaussianSplatViewer
                 plyUrl={PLY_URL}
                 fallbackImage={FALLBACK_IMAGE}
-                fallbackAlt={`${industry.industry} product ${i + 1}`}
+                fallbackAlt={`${product.brand} ${product.name}`}
                 cameraPosition={camPos}
                 cameraLookAt={camLookAt}
                 objectRotation={objRotation}
                 style={{ width: "100%", height: "100%" }}
               />
+              {/* Hover overlay */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  backgroundColor: hoveredCell === i ? "rgba(0, 0, 0, 0.04)" : "transparent",
+                  transition: "background-color 300ms ease",
+                  pointerEvents: "none",
+                }}
+              />
+              {/* Product info on hover */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 20,
+                  left: 20,
+                  opacity: hoveredCell === i ? 1 : 0,
+                  transform: hoveredCell === i ? "translateY(0)" : "translateY(6px)",
+                  transition: "opacity 250ms ease, transform 250ms ease",
+                  pointerEvents: hoveredCell === i ? "auto" : "none",
+                }}
+              >
+                <p className="text-[10px] font-medium text-content-secondary mb-[2px]">
+                  {product.brand}
+                </p>
+                <Link
+                  href={`/products/${product.handle}`}
+                  className="text-[12px] font-medium text-[#2A2A27] hover:underline"
+                >
+                  {product.name}
+                </Link>
+              </div>
             </div>
           ))}
         </div>
