@@ -10,6 +10,7 @@ export default function Navbar() {
   const [expanded, setExpanded] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const [listHeight, setListHeight] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -17,6 +18,22 @@ export default function Navbar() {
       setListHeight(listRef.current.scrollHeight);
     }
   }, [expanded]);
+
+  // Listen for hover events from IndustryShowcase
+  useEffect(() => {
+    const onHover = (e: Event) => {
+      const index = (e as CustomEvent).detail as number | null;
+      if (index !== null) {
+        setHoveredIndex(index);
+        setExpanded(true);
+      } else {
+        setHoveredIndex(null);
+        setExpanded(false);
+      }
+    };
+    window.addEventListener("hoverIndustry", onHover);
+    return () => window.removeEventListener("hoverIndustry", onHover);
+  }, []);
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none" style={{ height: expanded ? "300px" : "140px" }}>
@@ -40,7 +57,10 @@ export default function Navbar() {
           </Link>
           <div className="flex items-center w-full text-[11px] font-medium whitespace-nowrap">
             <button
-              onClick={() => setExpanded(!expanded)}
+              onClick={() => {
+                setExpanded(!expanded);
+                if (expanded) setHoveredIndex(null);
+              }}
               className="hover:opacity-70 transition-opacity cursor-pointer"
               style={{ color: "#2A2A27" }}
             >
@@ -84,15 +104,20 @@ export default function Navbar() {
           }}
         >
           <div className="flex flex-wrap gap-x-[24px] gap-y-[6px] pt-[16px] pb-[6px]">
-            {industries.map((item) => (
+            {industries.map((item, index) => (
               <button
                 key={item.id}
                 onClick={() => {
                   router.push(`/industry/${item.slug}`);
                   setExpanded(false);
+                  setHoveredIndex(null);
                 }}
                 className="text-[11px] font-medium hover:opacity-70 transition-opacity cursor-pointer"
-                style={{ color: "#BBBBB7" }}
+                style={{
+                  color: "#BBBBB7",
+                  opacity: hoveredIndex !== null ? (index === hoveredIndex ? 1 : 0.3) : 1,
+                  transition: "opacity 300ms ease",
+                }}
               >
                 {item.industry}
               </button>

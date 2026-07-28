@@ -92,6 +92,7 @@ export default function IndustryShowcase() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [winSize, setWinSize] = useState({ w: 1440, h: 900 });
   const scrollCooldown = useRef(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const update = () => setWinSize({ w: window.innerWidth, h: window.innerHeight });
@@ -261,18 +262,36 @@ export default function IndustryShowcase() {
 
           const pos = showExpanded ? expanded : grid;
 
+          // In grid mode with hover: hovered item full opacity, others 50%
+          const gridHoverOpacity = viewMode === "grid" && hoveredIndex !== null
+            ? (index === hoveredIndex ? 1 : 0.5)
+            : 1;
+          const itemOpacity = hidden ? 0 : gridHoverOpacity;
+
           return (
             <div
               key={item.id}
               onClick={() => viewMode === "grid" && !isAnimating && handleExpand(index)}
+              onMouseEnter={() => {
+                if (viewMode === "grid") {
+                  setHoveredIndex(index);
+                  window.dispatchEvent(new CustomEvent("hoverIndustry", { detail: index }));
+                }
+              }}
+              onMouseLeave={() => {
+                if (viewMode === "grid") {
+                  setHoveredIndex(null);
+                  window.dispatchEvent(new CustomEvent("hoverIndustry", { detail: null }));
+                }
+              }}
               style={{
                 position: "absolute",
                 left: pos.left,
                 top: pos.top,
                 width: pos.width,
                 height: pos.height,
-                opacity: hidden ? 0 : 1,
-                transition: `left ${DURATION}ms ${EASE}, top ${DURATION}ms ${EASE}, width ${DURATION}ms ${EASE}, height ${DURATION}ms ${EASE}, opacity ${hidden ? 300 : DURATION}ms ${EASE}`,
+                opacity: itemOpacity,
+                transition: `left ${DURATION}ms ${EASE}, top ${DURATION}ms ${EASE}, width ${DURATION}ms ${EASE}, height ${DURATION}ms ${EASE}, opacity 300ms ${EASE}`,
                 cursor: viewMode === "grid" ? "pointer" : "default",
                 pointerEvents: hidden ? "none" : "auto",
                 willChange: "left, top, width, height, opacity",
