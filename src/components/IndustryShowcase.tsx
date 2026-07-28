@@ -271,7 +271,13 @@ export default function IndustryShowcase() {
           return (
             <div
               key={item.id}
-              onClick={() => viewMode === "grid" && !isAnimating && handleExpand(index)}
+              onClick={() => {
+                if (viewMode === "grid" && !isAnimating) {
+                  setHoveredIndex(null);
+                  window.dispatchEvent(new CustomEvent("hoverIndustry", { detail: null }));
+                  handleExpand(index);
+                }
+              }}
               onMouseEnter={() => {
                 if (viewMode === "grid") {
                   setHoveredIndex(index);
