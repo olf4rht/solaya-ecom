@@ -2,8 +2,8 @@ import CtaButton from "./CtaButton";
 
 export default function Footer() {
   return (
-    <footer className="bg-bg-primary flex flex-col items-start justify-end px-[31px] py-[27px] w-full gap-[30px]">
-      <div className="flex items-center gap-[12px]">
+    <footer className="bg-bg-primary flex flex-col items-start justify-end px-4 md:px-[31px] py-[27px] w-full gap-[20px] md:gap-[30px]">
+      <div className="flex flex-wrap items-center gap-[12px]">
         <CtaButton href="https://solaya.app" external>
           Download Solaya
         </CtaButton>
@@ -11,7 +11,7 @@ export default function Footer() {
           Book a Demo
         </CtaButton>
       </div>
-      <div className="flex gap-[50px] items-center w-full">
+      <div className="flex flex-wrap gap-[20px] md:gap-[50px] items-center w-full">
         <a
           href="/terms"
           className="bg-bg-footer-pill flex items-center justify-center p-[6px] rounded-[5px] text-[11px] font-medium text-content-primary hover:opacity-70 transition-opacity"

@@ -37,24 +37,24 @@ export default function Navbar() {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none" style={{ height: expanded ? "300px" : "140px" }}>
-      {/* Try Solaya CTA — top right */}
+      {/* Download Solaya CTA — top right, hidden on small mobile */}
       <a
         href="https://solaya.app"
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute right-[41px] top-[26px] pointer-events-auto inline-flex items-center justify-center h-[38px] px-[20px] rounded-[12px] bg-[#2A2A27] text-[12px] font-medium text-white tracking-[0.2px] hover:bg-[#3a3a37] transition-colors"
+        className="absolute right-4 md:right-[41px] top-[26px] pointer-events-auto hidden sm:inline-flex items-center justify-center h-[38px] px-[20px] rounded-[12px] bg-[#2A2A27] text-[12px] font-medium text-white tracking-[0.2px] hover:bg-[#3a3a37] transition-colors"
       >
         Download Solaya
       </a>
       <div
-        className="bg-white flex flex-col items-start left-[41px] px-[14px] py-[9px] rounded-[20px] top-[26px] absolute pointer-events-auto"
+        className="bg-white flex flex-col items-start left-4 md:left-[41px] px-[14px] py-[9px] rounded-[20px] top-[26px] absolute pointer-events-auto"
         style={{
-          width: "clamp(320px, 23%, 395px)",
+          width: "clamp(260px, 70vw, 395px)",
           transition: "height 400ms cubic-bezier(0.16, 1, 0.3, 1)",
           overflow: "hidden",
         }}
       >
-        <div className="flex flex-col gap-[31px] items-start w-full">
+        <div className="flex flex-col gap-[20px] md:gap-[31px] items-start w-full">
           <Link href="/">
             <Image
               src="/assets/logo.svg"
@@ -75,9 +75,9 @@ export default function Navbar() {
             >
               Industry
             </button>
-            <div className="ml-auto flex items-center gap-[40px]">
+            <div className="ml-auto flex items-center gap-[20px] md:gap-[40px]">
               <button
-                className="hover:opacity-70 transition-opacity cursor-pointer"
+                className="hover:opacity-70 transition-opacity cursor-pointer hidden sm:block"
                 style={{
                   color: expanded ? "#BBBBB7" : "#2A2A27",
                   transition: "color 300ms ease",

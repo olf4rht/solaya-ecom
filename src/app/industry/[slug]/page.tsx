@@ -41,41 +41,30 @@ export default function IndustryPage() {
       <Navbar />
 
       {/* Industry info — top left */}
-      <div style={{ paddingTop: "200px", paddingLeft: "41px", paddingRight: "41px" }}>
+      <div className="pt-[140px] md:pt-[200px] px-4 md:px-[41px]">
         <p className="text-[11px] font-medium text-content-secondary tracking-wide mb-2">
           Industry {padIndex(currentIndex)} / {padIndex(TOTAL_INDUSTRIES)}
         </p>
-        <h2 className="text-[30px] font-normal text-[#302c2c] tracking-[-0.6px] leading-[1.1]">
+        <h2 className="text-[24px] md:text-[30px] font-normal text-[#302c2c] tracking-[-0.6px] leading-[1.1]">
           {industry.industry}
         </h2>
       </div>
 
-      {/* 3x2 Grid of .ply viewers */}
-      <div
-        style={{
-          margin: "60px 0 80px 0",
-          aspectRatio: "3 / 2",
-        }}
-      >
+      {/* Grid of .ply viewers — 1 col mobile, 2 col tablet, 3 col desktop */}
+      <div className="mt-8 md:mt-[60px] mb-12 md:mb-[80px]">
         <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gridTemplateRows: "repeat(2, 1fr)",
-            width: "100%",
-            height: "100%",
-            border: "1px solid #e5e5e0",
-          }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full"
+          style={{ border: "1px solid #e5e5e0" }}
         >
           {products.map((product, i) => (
             <div
               key={i}
               onMouseEnter={() => setHoveredCell(i)}
               onMouseLeave={() => setHoveredCell(null)}
+              className="relative aspect-square"
               style={{
-                borderRight: (i % 3) < 2 ? "1px solid #e5e5e0" : "none",
-                borderBottom: i < 3 ? "1px solid #e5e5e0" : "none",
-                position: "relative",
+                borderRight: "1px solid #e5e5e0",
+                borderBottom: "1px solid #e5e5e0",
               }}
             >
               <GaussianSplatViewer
@@ -127,7 +116,7 @@ export default function IndustryPage() {
       </div>
 
       {/* CTA Section */}
-      <div style={{ padding: "0 41px 60px 41px" }} className="flex items-center gap-[16px]">
+      <div className="px-4 md:px-[41px] pb-10 md:pb-[60px] flex flex-wrap items-center gap-[16px]">
         <CtaButton href="https://solaya.app" external>
           Download Solaya
         </CtaButton>
@@ -137,7 +126,7 @@ export default function IndustryPage() {
       </div>
 
       {/* Footer */}
-      <div style={{ padding: "0 41px 30px 41px" }} className="flex items-center gap-[40px]">
+      <div className="px-4 md:px-[41px] pb-[30px] flex flex-wrap items-center gap-[20px] md:gap-[40px]">
         <span className="text-[11px] font-medium text-content-secondary cursor-pointer hover:opacity-70 transition-opacity">
           Terms of Service
         </span>

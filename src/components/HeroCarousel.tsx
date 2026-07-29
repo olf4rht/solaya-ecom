@@ -34,14 +34,33 @@ const heroItems: HeroItem[] = [
 
 const EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
 const DURATION = "700ms";
-const ITEM_SIZE = 120;
 const COUNT = heroItems.length;
-const VIEWER_SIZE = 600;
+
+function useResponsiveSizes() {
+  const [sizes, setSizes] = useState({ item: 120, viewer: 600, height: 900 });
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      if (w < 640) {
+        setSizes({ item: 60, viewer: Math.min(w - 40, 320), height: 500 });
+      } else if (w < 1024) {
+        setSizes({ item: 90, viewer: Math.min(w - 80, 450), height: 700 });
+      } else {
+        setSizes({ item: 120, viewer: 600, height: 900 });
+      }
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  return sizes;
+}
 
 export default function HeroCarousel() {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [rotationMode, setRotationMode] = useState<RotationMode>("auto");
+  const { item: ITEM_SIZE, viewer: VIEWER_SIZE, height: containerHeight } = useResponsiveSizes();
   const hasExpanded = expandedIndex !== null;
 
   const handleClick = useCallback((index: number) => {
@@ -104,7 +123,7 @@ export default function HeroCarousel() {
   const showPlyOverlay = hasExpanded && has3D && rotationMode === "manual";
 
   return (
-    <div className="bg-bg-primary w-full overflow-hidden relative" style={{ height: "900px" }}>
+    <div className="bg-bg-primary w-full overflow-hidden relative" style={{ height: `${containerHeight}px` }}>
       <style>{`
         @keyframes fadeInLeft {
           from { opacity: 0; transform: translateX(-12px); }
@@ -112,7 +131,7 @@ export default function HeroCarousel() {
         }
       `}</style>
       {/* Vertically centered but shifted up slightly */}
-      <div className="w-full h-full flex items-center justify-center" style={{ paddingBottom: "120px" }}>
+      <div className="w-full h-full flex items-center justify-center" style={{ paddingBottom: containerHeight < 700 ? "60px" : "120px" }}>
         <div
           className="flex items-center gap-4"
           style={{
@@ -175,7 +194,7 @@ export default function HeroCarousel() {
       {showPlyOverlay && (
         <div
           className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          style={{ zIndex: 15, paddingBottom: "120px" }}
+          style={{ zIndex: 15, paddingBottom: containerHeight < 700 ? "60px" : "120px" }}
         >
           <div
             className="pointer-events-auto"
@@ -226,11 +245,11 @@ export default function HeroCarousel() {
         </div>
       )}
 
-      {/* Product info — left side */}
+      {/* Product info — left side on desktop, bottom-left on mobile */}
       {hasExpanded && (
         <div
-          className="absolute left-12 top-1/2 -translate-y-1/2"
-          style={{ zIndex: 20, paddingBottom: "120px" }}
+          className="absolute left-4 md:left-12 bottom-8 md:bottom-auto md:top-1/2 md:-translate-y-1/2"
+          style={{ zIndex: 20, paddingBottom: containerHeight < 700 ? "0px" : "120px" }}
         >
           <div
             className="space-y-3"
@@ -238,15 +257,15 @@ export default function HeroCarousel() {
               animation: `fadeInLeft ${DURATION} ${EASE} both`,
             }}
           >
-            <h2 className="text-[22px] font-medium text-content-primary tracking-tight leading-tight">
+            <h2 className="text-[18px] md:text-[22px] font-medium text-content-primary tracking-tight leading-tight">
               {expandedItem?.label}
             </h2>
             <div className="space-y-1">
-              <p className="text-[12px] text-content-tertiary tracking-wide">
+              <p className="text-[11px] md:text-[12px] text-content-tertiary tracking-wide">
                 <span className="uppercase">Client:</span>{" "}
                 <span className="text-content-secondary">{expandedItem?.client}</span>
               </p>
-              <p className="text-[12px] text-content-tertiary tracking-wide">
+              <p className="text-[11px] md:text-[12px] text-content-tertiary tracking-wide">
                 <span className="uppercase">Industry:</span>{" "}
                 <span className="text-content-secondary">{expandedItem?.industry}</span>
               </p>
