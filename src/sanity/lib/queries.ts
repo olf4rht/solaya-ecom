@@ -30,6 +30,7 @@ export const industryBySlugQuery = groq`
     brand,
     homepageVideo,
     homepageFallbackImage,
+    order,
     "products": products[]-> {
       _id,
       title,
@@ -71,6 +72,7 @@ export const allProductsQuery = groq`
     _id,
     title,
     "slug": slug.current,
+    brand,
     coverImage
   }
 `;

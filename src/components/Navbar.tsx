@@ -4,9 +4,13 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { industries } from "@/lib/industries";
+interface NavIndustry {
+  _id: string;
+  title: string;
+  slug: string;
+}
 
-export default function Navbar() {
+export default function Navbar({ industries }: { industries: NavIndustry[] }) {
   const [expanded, setExpanded] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const [listHeight, setListHeight] = useState(0);
@@ -115,7 +119,7 @@ export default function Navbar() {
           <div className="flex flex-col items-start gap-[6px] pt-[16px] pb-[6px] w-full">
             {industries.map((item, index) => (
               <button
-                key={item.id}
+                key={item._id}
                 onClick={() => {
                   router.push(`/industry/${item.slug}`);
                   setExpanded(false);
@@ -128,7 +132,7 @@ export default function Navbar() {
                   transition: "opacity 300ms ease",
                 }}
               >
-                {item.industry}
+                {item.title}
               </button>
             ))}
           </div>

@@ -2,14 +2,13 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { industries, TOTAL_INDUSTRIES } from "@/lib/industries";
 import Link from "next/link";
+import type { SanityIndustry } from "@/sanity/types";
+import { urlFor } from "@/sanity/lib/image";
 
 type ViewMode = "list" | "grid";
 
 const EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
-const TOTAL = TOTAL_INDUSTRIES;
 const DURATION = 700;
 
 function ListIcon() {
@@ -86,13 +85,15 @@ function ViewToggle({
   );
 }
 
-export default function IndustryShowcase() {
+export default function IndustryShowcase({ industries }: { industries: SanityIndustry[] }) {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [winSize, setWinSize] = useState({ w: 1440, h: 900 });
   const scrollCooldown = useRef(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  const TOTAL = industries.length;
 
   useEffect(() => {
     const update = () => setWinSize({ w: window.innerWidth, h: window.innerHeight });
@@ -139,7 +140,7 @@ export default function IndustryShowcase() {
       width: size,
       height: size,
     };
-  }, [winSize, isMobile, isTablet]);
+  }, [winSize, isMobile, isTablet, TOTAL]);
 
   const getExpandedPos = useCallback(() => {
     const scale = isMobile ? 0.85 : isTablet ? 0.75 : 0.7;
@@ -173,7 +174,7 @@ export default function IndustryShowcase() {
     };
     window.addEventListener("selectIndustry", onSelect);
     return () => window.removeEventListener("selectIndustry", onSelect);
-  }, []);
+  }, [TOTAL]);
 
   const handleClose = useCallback(() => {
     if (isAnimating) return;
@@ -238,7 +239,7 @@ export default function IndustryShowcase() {
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [viewMode, activeIndex, isAnimating]);
+  }, [viewMode, activeIndex, isAnimating, TOTAL]);
 
   const expanded = getExpandedPos();
 
@@ -280,7 +281,7 @@ export default function IndustryShowcase() {
           Industry {padIndex(activeIndex)} / {padIndex(TOTAL)}
         </p>
         <h2 className="text-[22px] md:text-[30px] font-normal text-[#302c2c] tracking-[-0.6px] leading-[1.1]">
-          {industries[activeIndex].industry}
+          {industries[activeIndex].title}
         </h2>
         <div className="mt-3 md:mt-5 flex items-baseline gap-[20px] md:gap-[40px]">
           <span className="text-[11px] font-medium text-content-primary">
@@ -321,7 +322,7 @@ export default function IndustryShowcase() {
 
           return (
             <div
-              key={item.id}
+              key={item._id}
               onClick={() => {
                 if (viewMode === "grid" && !isAnimating) {
                   setHoveredIndex(null);
@@ -354,20 +355,20 @@ export default function IndustryShowcase() {
                 willChange: "left, top, width, height, opacity",
               }}
             >
-              {item.videoUrl ? (
+              {item.homepageVideo?.url ? (
                 <video
-                  src={item.videoUrl}
+                  src={item.homepageVideo.url}
                   autoPlay
                   loop
                   muted
                   playsInline
                   className="w-full h-full object-contain"
                 />
-              ) : item.image ? (
+              ) : item.homepageFallbackImage ? (
                 <div className="relative w-full h-full">
                   <Image
-                    src={item.image}
-                    alt={item.industry}
+                    src={urlFor(item.homepageFallbackImage).width(800).url()}
+                    alt={item.title}
                     fill
                     className="object-contain"
                     sizes="70vw"
