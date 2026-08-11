@@ -1,9 +1,13 @@
 import { defineType } from "sanity";
+import R2FileInput from "../components/R2FileInput";
 
 export const r2File = defineType({
   name: "r2File",
   title: "R2 File",
   type: "object",
+  components: {
+    input: R2FileInput,
+  },
   fields: [
     {
       name: "url",
