@@ -1,13 +1,14 @@
 import { sanityClient } from "@/sanity/lib/client";
-import { productBySlugQuery, allProductsQuery } from "@/sanity/lib/queries";
-import type { SanityProduct, SanityProductSummary } from "@/sanity/types";
+import { productBySlugQuery, allProductsQuery, allIndustriesQuery } from "@/sanity/lib/queries";
+import type { SanityProduct, SanityProductSummary, SanityIndustry } from "@/sanity/types";
 import ProductPageClient from "./ProductPageClient";
 
 export default async function ProductPage({ params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
-  const [product, allProducts]: [SanityProduct | null, SanityProductSummary[]] = await Promise.all([
+  const [product, allProducts, industries]: [SanityProduct | null, SanityProductSummary[], SanityIndustry[]] = await Promise.all([
     sanityClient.fetch(productBySlugQuery, { slug: handle }),
     sanityClient.fetch(allProductsQuery),
+    sanityClient.fetch(allIndustriesQuery),
   ]);
 
   if (!product) {
@@ -18,5 +19,5 @@ export default async function ProductPage({ params }: { params: Promise<{ handle
     );
   }
 
-  return <ProductPageClient product={product} allProducts={allProducts} />;
+  return <ProductPageClient product={product} allProducts={allProducts} industries={industries} />;
 }

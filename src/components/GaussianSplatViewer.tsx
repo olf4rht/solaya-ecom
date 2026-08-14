@@ -20,9 +20,13 @@ interface GaussianSplatViewerProps {
 const FOV_130MM = 2 * Math.atan(24 / (2 * 130)) * (180 / Math.PI); // ~10.5°
 
 function getProxiedUrl(url: string): string {
-  const prefix = "https://assets-bear.solaya-app.com/";
-  if (url.startsWith(prefix)) {
-    return `/api/solaya-models/${url.slice(prefix.length)}`;
+  const solayaPrefix = "https://assets-bear.solaya-app.com/";
+  if (url.startsWith(solayaPrefix)) {
+    return `/api/solaya-models/${url.slice(solayaPrefix.length)}`;
+  }
+  const r2Prefix = "https://pub-b09a781e649c4a3facf5c63382f0302d.r2.dev/";
+  if (url.startsWith(r2Prefix)) {
+    return `/api/r2-files/${url.slice(r2Prefix.length)}`;
   }
   return url;
 }

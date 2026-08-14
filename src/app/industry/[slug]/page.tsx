@@ -1,13 +1,14 @@
 import { sanityClient } from "@/sanity/lib/client";
-import { industryBySlugQuery, industryCountQuery } from "@/sanity/lib/queries";
+import { industryBySlugQuery, industryCountQuery, allIndustriesQuery } from "@/sanity/lib/queries";
 import type { SanityIndustry } from "@/sanity/types";
 import IndustryPageClient from "./IndustryPageClient";
 
 export default async function IndustryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [industry, totalCount]: [SanityIndustry | null, number] = await Promise.all([
+  const [industry, totalCount, allIndustries]: [SanityIndustry | null, number, SanityIndustry[]] = await Promise.all([
     sanityClient.fetch(industryBySlugQuery, { slug }),
     sanityClient.fetch(industryCountQuery),
+    sanityClient.fetch(allIndustriesQuery),
   ]);
 
   if (!industry) {
@@ -18,5 +19,5 @@ export default async function IndustryPage({ params }: { params: Promise<{ slug:
     );
   }
 
-  return <IndustryPageClient industry={industry} totalCount={totalCount} />;
+  return <IndustryPageClient industry={industry} totalCount={totalCount} allIndustries={allIndustries} />;
 }

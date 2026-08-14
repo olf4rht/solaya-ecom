@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import type { SanityProduct, SanityProductSummary } from "@/sanity/types";
+import type { SanityProduct, SanityProductSummary, SanityIndustry } from "@/sanity/types";
 import { urlFor } from "@/sanity/lib/image";
 import Navbar from "@/components/Navbar";
 import ProductGrid from "@/components/ProductGrid";
@@ -12,9 +12,11 @@ import CtaButton from "@/components/CtaButton";
 export default function ProductPageClient({
   product,
   allProducts,
+  industries,
 }: {
   product: SanityProduct;
   allProducts: SanityProductSummary[];
+  industries: SanityIndustry[];
 }) {
   // Build image list from media array
   const detailImages: string[] = [];
@@ -59,7 +61,7 @@ export default function ProductPageClient({
 
   return (
     <div className="bg-bg-primary flex flex-col items-start w-full">
-      <Navbar industries={[]} />
+      <Navbar industries={industries} />
 
       <div className="h-[100px] md:h-[140px]" />
 

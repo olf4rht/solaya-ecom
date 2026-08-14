@@ -15,9 +15,11 @@ function padIndex(i: number) {
 export default function IndustryPageClient({
   industry,
   totalCount,
+  allIndustries,
 }: {
   industry: SanityIndustry;
   totalCount: number;
+  allIndustries: SanityIndustry[];
 }) {
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
   const camPos: [number, number, number] = [-12, 0.3, 0];
@@ -26,12 +28,9 @@ export default function IndustryPageClient({
 
   const products = industry.products || [];
 
-  // Pass minimal industry data to Navbar (it won't have the full list here)
-  const navIndustries = [{ _id: industry._id, title: industry.title, slug: industry.slug }];
-
   return (
     <div className="relative min-h-screen bg-bg-primary">
-      <Navbar industries={navIndustries} />
+      <Navbar industries={allIndustries} />
 
       <div className="pt-[140px] md:pt-[200px] px-4 md:px-[41px]">
         <p className="text-[11px] font-medium text-content-secondary tracking-wide mb-2">
