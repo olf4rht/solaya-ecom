@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { SanityIndustry } from "@/sanity/types";
 import { urlFor } from "@/sanity/lib/image";
-import GaussianSplatViewer from "@/components/GaussianSplatViewer";
+import SolayaViewer from "@/components/SolayaViewer";
 import Navbar from "@/components/Navbar";
 import CtaButton from "@/components/CtaButton";
 
@@ -22,9 +22,6 @@ export default function IndustryPageClient({
   allIndustries: SanityIndustry[];
 }) {
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
-  const camPos: [number, number, number] = [-12, 0.3, 0];
-  const camLookAt: [number, number, number] = [0, 0, 0];
-  const objRotation: [number, number, number] = [-2, 0, 34];
 
   const products = industry.products || [];
 
@@ -62,15 +59,9 @@ export default function IndustryPageClient({
                   borderBottom: "1px solid #e5e5e0",
                 }}
               >
-                <GaussianSplatViewer
-                  plyUrl={product.plyFile?.url || "/assets/models/white-nike-airforce.ply"}
-                  fallbackImage={fallbackImg}
-                  fallbackAlt={`${product.brand || ""} ${product.title}`}
-                  cameraPosition={camPos}
-                  cameraLookAt={camLookAt}
-                  objectRotation={objRotation}
-                  delay={i * 100}
-                  lowDpr
+                <SolayaViewer
+                  splatUrl={product.plyFile?.url || "/assets/models/white-nike-airforce.ply"}
+                  previewImageUrl={fallbackImg}
                   style={{ width: "100%", height: "100%" }}
                 />
                 <div
