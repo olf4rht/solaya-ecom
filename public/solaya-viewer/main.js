@@ -80,13 +80,14 @@ assetListLoader.load(() => {
         clearColorBuffer: true,
         clearDepthBuffer: true,
         clearColor: loadingPageColor,
+        fov: 10.3, // 120mm equivalent on 35mm sensor
     });
     camera.setPosition(0, 0.1, 4.22);
     camera.addComponent('script');
     camera.script.create('orbitCamera', {
         attributes: {
-            distanceMax: 10,
-            distanceMin: 3,
+            distanceMax: 30,
+            distanceMin: 10,
             full: true,
             inertiaFactor: 0.2,
             frameOnStart: true
