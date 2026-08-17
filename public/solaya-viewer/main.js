@@ -90,7 +90,7 @@ assetListLoader.load(() => {
             distanceMin: 10,
             full: true,
             inertiaFactor: 0.2,
-            frameOnStart: true
+            frameOnStart: false
         }
     });
     camera.script.create('touchInput');

@@ -241,11 +241,15 @@ GsLoad.prototype.centerGSplat = function (entity) {
         entity.setLocalScale(scaleFactorY, scaleFactorY, scaleFactorY);
     } 
 
-    // Re-frame the orbit camera on the centered model
+    // Set orbit camera to fixed distance and slight downward pitch
     var camera = this.app.root.findByName("Camera");
     if (camera && camera.script && camera.script.orbitCamera) {
         var orbitCam = camera.script.orbitCamera;
-        orbitCam.focus(entity);
+        orbitCam._pivotPoint.set(0, 0, 0);
+        orbitCam.distance = 17;
+        orbitCam.pitch = -6.2;
+        orbitCam._removeInertia();
+        orbitCam._updatePosition();
     }
 };
 
