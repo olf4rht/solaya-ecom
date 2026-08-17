@@ -104,7 +104,7 @@ export default function ProductPageClient({
                 }}
               >
                 {view.type === "3d" ? (
-                  <div className="relative w-full" style={{ aspectRatio: "4/5" }}>
+                  <div className="relative w-full" style={{ aspectRatio: "1/1" }}>
                     <SolayaViewer
                       splatUrl={product.plyFile!.url}
                       blockBottom={product.blockBottom}
@@ -114,7 +114,7 @@ export default function ProductPageClient({
                     />
                   </div>
                 ) : view.type === "video" ? (
-                  <div className="relative w-full bg-[#f5f5f5]" style={{ aspectRatio: "4/5" }}>
+                  <div className="relative w-full bg-[#f5f5f5]" style={{ aspectRatio: "1/1" }}>
                     <video
                       src={view.src}
                       autoPlay
@@ -125,7 +125,7 @@ export default function ProductPageClient({
                     />
                   </div>
                 ) : (
-                  <div className="relative w-full bg-[#f5f5f5]" style={{ aspectRatio: "4/5" }}>
+                  <div className="relative w-full bg-[#f5f5f5]" style={{ aspectRatio: "1/1" }}>
                     <Image
                       src={view.src}
                       alt={product.title}
@@ -144,7 +144,7 @@ export default function ProductPageClient({
           <div className="w-full lg:w-[35%] lg:border-l border-[#ececec]">
             <div className="lg:sticky lg:top-[140px] flex flex-col gap-6 px-6 md:px-10 lg:px-10 py-8 lg:py-10">
               <div>
-                <h1 className="font-medium text-[18px] md:text-[22px] tracking-[-0.4px] text-content-primary leading-tight uppercase">
+                <h1 className="font-medium text-[18px] md:text-[22px] tracking-[-0.4px] text-content-primary leading-tight">
                   {product.title}
                 </h1>
                 <p className="text-[13px] text-content-secondary mt-1">
