@@ -23,7 +23,7 @@ export default function SolayaViewer({
   splatUrl,
   previewImageUrl,
   color = "#FCFBFB",
-  initialAngle = 0,
+  initialAngle = 180,
   autoLoad = true,
   className,
   style,
