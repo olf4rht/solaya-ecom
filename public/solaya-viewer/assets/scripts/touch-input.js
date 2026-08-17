@@ -116,16 +116,6 @@ TouchInput.prototype.onTouchMove = function(event) {
         this.lastTouchPoint.set(touch.x, touch.y);
     
     } else if (touches.length == 2) {
-        // Calculate the difference in pinch distance since the last event
-        var currentPinchDistance = this.getPinchDistance(touches[0], touches[1]);
-        var diffInPinchDistance = currentPinchDistance - this.lastPinchDistance;
-        this.lastPinchDistance = currentPinchDistance;
-                
-        this.orbitCamera.distance -= (diffInPinchDistance * this.distanceSensitivity * 0.1) * (this.orbitCamera.distance * 0.1);
-        
-        // Calculate pan difference
-        this.calcMidPoint(touches[0], touches[1], pinchMidPoint);
-        this.pan(pinchMidPoint);
-        this.lastPinchMidPoint.copy(pinchMidPoint);
+        // Pinch zoom and pan disabled
     }
 };

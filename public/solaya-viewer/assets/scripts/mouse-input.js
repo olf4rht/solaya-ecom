@@ -121,7 +121,7 @@ MouseInput.prototype.onMouseMove = function (event) {
 
 
 MouseInput.prototype.onMouseWheel = function (event) {
-    this.orbitCamera.distance -= event.wheel * this.distanceSensitivity * (this.orbitCamera.distance * 0.1);
+    // Zoom disabled
     event.event.preventDefault();
 };
 
