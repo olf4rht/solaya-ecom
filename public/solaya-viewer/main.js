@@ -86,8 +86,8 @@ assetListLoader.load(() => {
     camera.addComponent('script');
     camera.script.create('orbitCamera', {
         attributes: {
-            distanceMax: 30,
-            distanceMin: 10,
+            distanceMax: 200,
+            distanceMin: 5,
             full: true,
             inertiaFactor: 0.2,
             frameOnStart: true
