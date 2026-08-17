@@ -19,28 +19,35 @@ export default function ProductPageClient({
   allProducts: SanityProductSummary[];
   industries: SanityIndustry[];
 }) {
-  // Build image list from media array (exclude cover image / thumbnail)
-  const detailImages: string[] = [];
+  // Build media views from media array (exclude cover image / thumbnail)
+  type MediaView =
+    | { type: "image"; src: string }
+    | { type: "video"; src: string }
+    | { type: "3d" };
+
+  const views: MediaView[] = [];
 
   if (product.media) {
     for (const item of product.media) {
       if (item._type === "image") {
-        detailImages.push(urlFor(item).width(1200).url());
+        views.push({ type: "image", src: urlFor(item).width(1200).url() });
+      } else if (item._type === "r2File" && item.url) {
+        views.push({ type: "video", src: item.url });
       }
     }
   }
 
-  // Fallback if no images at all
-  if (detailImages.length === 0) {
-    detailImages.push("/assets/products/detail-main.png");
+  // Fallback if no media at all
+  if (views.length === 0) {
+    views.push({ type: "image", src: "/assets/products/detail-main.png" });
   }
 
   // Add 3D viewer as last view if product has a .ply file
-  const has3D = !!product.plyFile?.url;
-  const threeDIndex = has3D ? detailImages.length : -1;
-  const totalViews = detailImages.length + (has3D ? 1 : 0);
+  if (product.plyFile?.url) {
+    views.push({ type: "3d" });
+  }
 
-  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedView, setSelectedView] = useState(0);
 
   const features: { icon: string; label: string; underline?: boolean }[] = [
     { icon: "/assets/icons/scans.svg", label: `${product.scans || 5} scans` },
@@ -68,15 +75,27 @@ export default function ProductPageClient({
         <div className="flex flex-col lg:flex-row w-full">
           <div className="flex flex-col sm:flex-row w-full lg:w-auto">
             <div className="border border-[#ececec] aspect-square sm:aspect-auto sm:h-[500px] lg:h-[935px] relative shrink-0 w-full sm:w-auto sm:flex-1 lg:w-[754px] lg:flex-none overflow-hidden">
-              {selectedImage === threeDIndex ? (
+              {views[selectedView].type === "3d" ? (
                 <SolayaViewer
                   splatUrl={product.plyFile!.url}
                   style={{ width: "100%", height: "100%" }}
                 />
+              ) : views[selectedView].type === "video" ? (
+                <div className="absolute inset-0 bg-[#f5f5f5] flex items-center justify-center">
+                  <video
+                    key={views[selectedView].src}
+                    src={views[selectedView].src}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               ) : (
                 <div className="absolute inset-0 bg-[#f5f5f5]">
                   <Image
-                    src={detailImages[selectedImage]}
+                    src={views[selectedView].src}
                     alt={product.title}
                     fill
                     className="object-cover"
@@ -88,22 +107,23 @@ export default function ProductPageClient({
             </div>
 
             <div className="flex flex-row sm:flex-col items-start overflow-x-auto sm:overflow-visible shrink-0 sm:w-[110px]">
-              {Array.from({ length: totalViews }, (_, index) => {
-                const isSelected = index === selectedImage;
-                const is3D = index === threeDIndex;
+              {views.map((view, index) => {
+                const isSelected = index === selectedView;
                 return (
                   <button
                     key={index}
-                    onClick={() => setSelectedImage(index)}
+                    onClick={() => setSelectedView(index)}
                     className="relative overflow-clip shrink-0 w-[80px] h-[80px] sm:w-[111px] sm:h-[114px] -mb-px -mr-px border border-[#ececec]"
                   >
                     <div className="absolute inset-0">
                       <div className={`absolute inset-0 bg-[#f5f5f5] flex items-center justify-center ${isSelected ? "" : "opacity-20"}`}>
-                        {is3D ? (
+                        {view.type === "3d" ? (
                           <span className="text-[10px] font-medium text-content-secondary">3D</span>
+                        ) : view.type === "video" ? (
+                          <span className="text-[10px] font-medium text-content-secondary">▶</span>
                         ) : (
                           <Image
-                            src={detailImages[index]}
+                            src={view.src}
                             alt={`View ${index + 1}`}
                             fill
                             className={`object-cover ${isSelected ? "" : "opacity-20"}`}
