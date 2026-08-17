@@ -84,7 +84,6 @@ export default function SolayaViewer({
           touchAction: "none",
         }}
         allow="fullscreen"
-        loading="lazy"
       />
     </div>
   );

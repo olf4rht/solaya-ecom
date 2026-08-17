@@ -75,7 +75,7 @@ export default function IndustryPageClient({
                 </div>
                 <Link
                   href={`/products/${product.slug}`}
-                  className="group px-0 pt-3 pb-4"
+                  className="group px-4 md:px-5 pt-3 pb-5"
                   style={{
                     borderRight: "1px solid #e5e5e0",
                   }}

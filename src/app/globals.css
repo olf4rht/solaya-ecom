@@ -63,7 +63,7 @@ body {
   backface-visibility: hidden;
 }
 
-img {
+img, iframe {
   backface-visibility: visible;
   -webkit-backface-visibility: visible;
 }
