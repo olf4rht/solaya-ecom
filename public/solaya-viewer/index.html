@@ -132,6 +132,11 @@
                     document.getElementById('val-yaw').textContent = oc._yaw.toFixed(1);
                     document.getElementById('val-pitch').textContent = oc._pitch.toFixed(1);
                     document.getElementById('val-zoom').textContent = els.z.value;
+                    // Sync slider positions to actual values
+                    if (!els.d.matches(':active')) els.d.value = oc._distance;
+                    if (!els.f.matches(':active')) els.f.value = cam.camera.fov;
+                    if (!els.y.matches(':active')) els.y.value = oc._yaw;
+                    if (!els.p.matches(':active')) els.p.value = oc._pitch;
                 }
                 function apply() { oc._removeInertia(); oc._updatePosition(); if(!oc.autoRender) app.renderNextFrame=true; }
                 els.d.oninput = (e) => { oc.distance=+e.target.value; apply(); };
