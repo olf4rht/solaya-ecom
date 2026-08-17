@@ -15,6 +15,7 @@ interface SolayaViewerProps {
   color?: string;
   initialAngle?: number;
   autoLoad?: boolean;
+  blockBottom?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -25,6 +26,7 @@ export default function SolayaViewer({
   color = "#FCFBFB",
   initialAngle = 180,
   autoLoad = true,
+  blockBottom = false,
   className,
   style,
 }: SolayaViewerProps) {
@@ -36,6 +38,7 @@ export default function SolayaViewer({
     autoLoad: String(autoLoad),
   });
   if (previewImageUrl) params.set("previewImgUrl", previewImageUrl);
+  if (blockBottom) params.set("blockBottom", "true");
 
   return (
     <iframe

@@ -61,6 +61,13 @@ export const product = defineType({
       ],
     }),
     defineField({
+      name: "blockBottom",
+      title: "Block bottom view",
+      type: "boolean",
+      initialValue: false,
+      description: "Prevent users from rotating to see the bottom of the 3D model (useful when the bottom is incomplete)",
+    }),
+    defineField({
       name: "scans",
       title: "Number of Scans",
       type: "number",

@@ -78,6 +78,7 @@ export default function ProductPageClient({
               {views[selectedView].type === "3d" ? (
                 <SolayaViewer
                   splatUrl={product.plyFile!.url}
+                  blockBottom={product.blockBottom}
                   style={{ width: "100%", height: "100%" }}
                 />
               ) : views[selectedView].type === "video" ? (

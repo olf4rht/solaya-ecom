@@ -12,6 +12,7 @@ export interface SanityProductSummary {
   brand?: string;
   coverImage?: SanityImageRef;
   plyFile?: SanityR2File;
+  blockBottom?: boolean;
 }
 
 export interface SanityIndustry {
@@ -34,6 +35,7 @@ export interface SanityProduct {
   category?: string;
   coverImage?: SanityImageRef;
   plyFile?: SanityR2File;
+  blockBottom?: boolean;
   media?: SanityMediaItem[];
   scans?: number;
   hasIntegrations?: boolean;

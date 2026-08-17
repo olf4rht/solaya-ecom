@@ -188,6 +188,11 @@ OrbitCamera.prototype.initialize = function () {
         this.pitchAngleMin = 0;
     }
 
+    const blockBottom = new URL(document.location).searchParams.get("blockBottom");
+    if (blockBottom === "true") {
+        this.pitchAngleMin = 0;
+    }
+
     const minUrlParam = new URL(document.location).searchParams.get("minZoom");
     this.distanceMin = Number(minUrlParam) || this.distanceMin;
 

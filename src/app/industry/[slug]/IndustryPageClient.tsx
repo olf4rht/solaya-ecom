@@ -62,6 +62,7 @@ export default function IndustryPageClient({
                 <SolayaViewer
                   splatUrl={product.plyFile?.url || "/assets/models/white-nike-airforce.ply"}
                   previewImageUrl={fallbackImg}
+                  blockBottom={product.blockBottom}
                   style={{ width: "100%", height: "100%" }}
                 />
                 <div
