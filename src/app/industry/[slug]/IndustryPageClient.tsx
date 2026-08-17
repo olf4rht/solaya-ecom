@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import type { SanityIndustry } from "@/sanity/types";
 import { urlFor } from "@/sanity/lib/image";
@@ -22,27 +22,24 @@ export default function IndustryPageClient({
   allIndustries: SanityIndustry[];
 }) {
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
-  // Mobile two-tap: first tap shows info, second tap navigates
   const [tappedCell, setTappedCell] = useState<number | null>(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  useEffect(() => {
+    setIsTouchDevice(window.matchMedia("(hover: none)").matches);
+  }, []);
 
   const products = industry.products || [];
 
-  const handleCellClick = useCallback((i: number, slug: string) => {
-    // On touch devices (no hover), use two-tap pattern
-    const isTouchDevice = window.matchMedia("(hover: none)").matches;
-    if (isTouchDevice) {
-      if (tappedCell === i) {
-        // Second tap — navigate
-        window.location.href = `/products/${slug}`;
-      } else {
-        // First tap — show info
-        setTappedCell(i);
-      }
+  // On mobile: first tap shows info, second tap navigates
+  const handleOverlayTap = useCallback((i: number, slug: string) => {
+    if (tappedCell === i) {
+      window.location.href = `/products/${slug}`;
+    } else {
+      setTappedCell(i);
     }
-    // On desktop, hover shows info, click always navigates
   }, [tappedCell]);
 
-  // On mobile, show info for tapped cell
   const isInfoVisible = (i: number) => hoveredCell === i || tappedCell === i;
 
   return (
@@ -75,12 +72,10 @@ export default function IndustryPageClient({
                 key={product._id}
                 onMouseEnter={() => setHoveredCell(i)}
                 onMouseLeave={() => setHoveredCell(null)}
-                onClick={() => handleCellClick(i, product.slug)}
                 className="relative aspect-square"
                 style={{
                   borderRight: "1px solid #e5e5e0",
                   borderBottom: "1px solid #e5e5e0",
-                  touchAction: "none",
                 }}
               >
                 <SolayaViewer
@@ -89,6 +84,18 @@ export default function IndustryPageClient({
                   blockBottom={product.blockBottom}
                   style={{ width: "100%", height: "100%" }}
                 />
+                {/* Mobile: transparent overlay to capture taps (iframe eats events) */}
+                {isTouchDevice && (
+                  <div
+                    onClick={() => handleOverlayTap(i, product.slug)}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      zIndex: 2,
+                      touchAction: "none",
+                    }}
+                  />
+                )}
                 <div
                   style={{
                     position: "absolute",
@@ -96,6 +103,7 @@ export default function IndustryPageClient({
                     backgroundColor: infoVisible ? "rgba(0, 0, 0, 0.04)" : "transparent",
                     transition: "background-color 300ms ease",
                     pointerEvents: "none",
+                    zIndex: 3,
                   }}
                 />
                 <div
@@ -103,6 +111,7 @@ export default function IndustryPageClient({
                     position: "absolute",
                     bottom: 20,
                     left: 20,
+                    zIndex: 4,
                     opacity: infoVisible ? 1 : 0,
                     transform: infoVisible ? "translateY(0)" : "translateY(6px)",
                     transition: "opacity 250ms ease, transform 250ms ease",

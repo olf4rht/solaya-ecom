@@ -102,6 +102,16 @@
         <!-- <script src="main.js"></script> -->
         <script type="module" src="main.js"></script>
         <script>
+            // Notify parent to lock/unlock scroll during touch interaction
+            document.addEventListener('touchstart', function() {
+                window.parent.postMessage({ type: 'solaya-viewer-touch', touching: true }, '*');
+            }, { passive: true });
+            document.addEventListener('touchend', function() {
+                window.parent.postMessage({ type: 'solaya-viewer-touch', touching: false }, '*');
+            }, { passive: true });
+            document.addEventListener('touchcancel', function() {
+                window.parent.postMessage({ type: 'solaya-viewer-touch', touching: false }, '*');
+            }, { passive: true });
 
             function getUrlParam(param) {
             const urlParams = new URLSearchParams(window.location.search);

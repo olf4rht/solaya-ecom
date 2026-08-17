@@ -28,6 +28,7 @@
   --color-content-primary: #2a2a27;
   --color-content-secondary: #767670;
   --color-content-tertiary: #bbb;
+  --font-sans: "Saans", sans-serif;
   --font-saans: "Saans", sans-serif;
 }
 
@@ -45,8 +46,8 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
-* {
-  font-family: inherit;
+*, *::before, *::after {
+  font-family: "Saans", sans-serif !important;
 }
 
 /* Smooth scroll with native feel */

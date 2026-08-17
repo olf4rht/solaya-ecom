@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 const R2_PREFIX = "https://pub-b09a781e649c4a3facf5c63382f0302d.r2.dev/";
 
 function getProxiedUrl(url: string): string {
@@ -30,6 +32,23 @@ export default function SolayaViewer({
   className,
   style,
 }: SolayaViewerProps) {
+  // Lock body scroll when user touches the 3D viewer iframe
+  useEffect(() => {
+    let activeCount = 0;
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === "solaya-viewer-touch") {
+        activeCount += e.data.touching ? 1 : -1;
+        if (activeCount < 0) activeCount = 0;
+        document.body.style.overflow = activeCount > 0 ? "hidden" : "";
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => {
+      window.removeEventListener("message", handler);
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   const proxiedSplatUrl = getProxiedUrl(splatUrl);
   const params = new URLSearchParams({
     splatUrl: proxiedSplatUrl,
