@@ -241,13 +241,11 @@ GsLoad.prototype.centerGSplat = function (entity) {
         entity.setLocalScale(scaleFactorY, scaleFactorY, scaleFactorY);
     } 
 
-    // Set the orbit camera pivot to origin (where the model was just centered)
+    // Re-frame the orbit camera on the centered model
     var camera = this.app.root.findByName("Camera");
     if (camera && camera.script && camera.script.orbitCamera) {
         var orbitCam = camera.script.orbitCamera;
-        orbitCam._pivotPoint.set(0, 0, 0);
-        orbitCam._removeInertia();
-        orbitCam._updatePosition();
+        orbitCam.focus(entity);
     }
 };
 

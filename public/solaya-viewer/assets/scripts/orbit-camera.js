@@ -358,7 +358,7 @@ OrbitCamera.prototype._checkAspectRatio = function () {
 
 OrbitCamera.prototype._buildAabb = function (entity, modelsAdded) {
     var i = 0, j = 0, meshInstances;
-    
+
     if (entity instanceof pc.Entity) {
         var allMeshInstances = [];
         var renders = entity.findComponents('render');
@@ -370,7 +370,7 @@ OrbitCamera.prototype._buildAabb = function (entity, modelsAdded) {
                     allMeshInstances.push(meshInstances[j]);
                 }
             }
-        }  
+        }
 
         var models = entity.findComponents('model');
         for (i = 0; i < models.length; ++i) {
@@ -380,7 +380,16 @@ OrbitCamera.prototype._buildAabb = function (entity, modelsAdded) {
                     allMeshInstances.push(meshInstances[j]);
                 }
             }
-        }  
+        }
+
+        // Include gsplat components so orbit camera can find gaussian splat bounding boxes
+        var gsplats = entity.findComponents('gsplat');
+        for (i = 0; i < gsplats.length; ++i) {
+            var instance = gsplats[i].instance;
+            if (instance && instance.meshInstance) {
+                allMeshInstances.push(instance.meshInstance);
+            }
+        }
 
         for (i = 0; i < allMeshInstances.length; i++) {
             if (modelsAdded === 0) {
