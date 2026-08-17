@@ -59,15 +59,17 @@ export default function SolayaViewer({
   }, [onTap]);
 
   const proxiedSplatUrl = getProxiedUrl(splatUrl);
+  const angle = initialAngle ?? 180;
+  const pitch = initialPitch ?? undefined;
   const params = new URLSearchParams({
     splatUrl: proxiedSplatUrl,
     color,
-    initialAngle: String(initialAngle),
+    initialAngle: String(angle),
     autoLoad: String(autoLoad),
   });
   if (previewImageUrl) params.set("previewImgUrl", previewImageUrl);
   if (blockBottom) params.set("blockBottom", "true");
-  if (initialPitch !== undefined) params.set("initialPitch", String(initialPitch));
+  if (pitch !== undefined) params.set("initialPitch", String(pitch));
 
   return (
     <div
