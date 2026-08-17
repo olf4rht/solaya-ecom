@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 const R2_PREFIX = "https://pub-b09a781e649c4a3facf5c63382f0302d.r2.dev/";
 
@@ -20,6 +20,7 @@ interface SolayaViewerProps {
   blockBottom?: boolean;
   className?: string;
   style?: React.CSSProperties;
+  onTap?: () => void;
 }
 
 export default function SolayaViewer({
@@ -31,15 +32,21 @@ export default function SolayaViewer({
   blockBottom = false,
   className,
   style,
+  onTap,
 }: SolayaViewerProps) {
-  // Lock body scroll when user touches the 3D viewer iframe
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Lock body scroll on touch + forward tap events
   useEffect(() => {
-    let activeCount = 0;
     const handler = (e: MessageEvent) => {
+      // Only handle messages from our iframe
+      if (iframeRef.current && e.source !== iframeRef.current.contentWindow) return;
+
       if (e.data?.type === "solaya-viewer-touch") {
-        activeCount += e.data.touching ? 1 : -1;
-        if (activeCount < 0) activeCount = 0;
-        document.body.style.overflow = activeCount > 0 ? "hidden" : "";
+        document.body.style.overflow = e.data.touching ? "hidden" : "";
+      }
+      if (e.data?.type === "solaya-viewer-tap" && onTap) {
+        onTap();
       }
     };
     window.addEventListener("message", handler);
@@ -47,7 +54,7 @@ export default function SolayaViewer({
       window.removeEventListener("message", handler);
       document.body.style.overflow = "";
     };
-  }, []);
+  }, [onTap]);
 
   const proxiedSplatUrl = getProxiedUrl(splatUrl);
   const params = new URLSearchParams({
@@ -65,6 +72,7 @@ export default function SolayaViewer({
       className={className}
     >
       <iframe
+        ref={iframeRef}
         src={`/solaya-viewer/index.html?${params.toString()}`}
         style={{
           border: "none",

@@ -103,11 +103,20 @@
         <script type="module" src="main.js"></script>
         <script>
             // Notify parent to lock/unlock scroll during touch interaction
+            // Also detect taps (touch without drag) for two-tap navigation
+            var _touchMoved = false;
             document.addEventListener('touchstart', function() {
+                _touchMoved = false;
                 window.parent.postMessage({ type: 'solaya-viewer-touch', touching: true }, '*');
+            }, { passive: true });
+            document.addEventListener('touchmove', function() {
+                _touchMoved = true;
             }, { passive: true });
             document.addEventListener('touchend', function() {
                 window.parent.postMessage({ type: 'solaya-viewer-touch', touching: false }, '*');
+                if (!_touchMoved) {
+                    window.parent.postMessage({ type: 'solaya-viewer-tap' }, '*');
+                }
             }, { passive: true });
             document.addEventListener('touchcancel', function() {
                 window.parent.postMessage({ type: 'solaya-viewer-touch', touching: false }, '*');

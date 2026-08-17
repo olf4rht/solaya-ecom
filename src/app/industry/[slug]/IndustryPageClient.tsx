@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import type { SanityIndustry } from "@/sanity/types";
 import { urlFor } from "@/sanity/lib/image";
@@ -23,22 +23,8 @@ export default function IndustryPageClient({
 }) {
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
   const [tappedCell, setTappedCell] = useState<number | null>(null);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
-
-  useEffect(() => {
-    setIsTouchDevice(window.matchMedia("(hover: none)").matches);
-  }, []);
 
   const products = industry.products || [];
-
-  // On mobile: first tap shows info, second tap navigates
-  const handleOverlayTap = useCallback((i: number, slug: string) => {
-    if (tappedCell === i) {
-      window.location.href = `/products/${slug}`;
-    } else {
-      setTappedCell(i);
-    }
-  }, [tappedCell]);
 
   const isInfoVisible = (i: number) => hoveredCell === i || tappedCell === i;
 
@@ -83,19 +69,14 @@ export default function IndustryPageClient({
                   previewImageUrl={fallbackImg}
                   blockBottom={product.blockBottom}
                   style={{ width: "100%", height: "100%" }}
+                  onTap={() => {
+                    if (tappedCell === i) {
+                      window.location.href = `/products/${product.slug}`;
+                    } else {
+                      setTappedCell(i);
+                    }
+                  }}
                 />
-                {/* Mobile: transparent overlay to capture taps (iframe eats events) */}
-                {isTouchDevice && (
-                  <div
-                    onClick={() => handleOverlayTap(i, product.slug)}
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      zIndex: 2,
-                      touchAction: "none",
-                    }}
-                  />
-                )}
                 <div
                   style={{
                     position: "absolute",
@@ -103,7 +84,6 @@ export default function IndustryPageClient({
                     backgroundColor: infoVisible ? "rgba(0, 0, 0, 0.04)" : "transparent",
                     transition: "background-color 300ms ease",
                     pointerEvents: "none",
-                    zIndex: 3,
                   }}
                 />
                 <div
@@ -111,7 +91,6 @@ export default function IndustryPageClient({
                     position: "absolute",
                     bottom: 20,
                     left: 20,
-                    zIndex: 4,
                     opacity: infoVisible ? 1 : 0,
                     transform: infoVisible ? "translateY(0)" : "translateY(6px)",
                     transition: "opacity 250ms ease, transform 250ms ease",
