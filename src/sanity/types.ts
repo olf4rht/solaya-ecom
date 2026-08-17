@@ -13,6 +13,8 @@ export interface SanityProductSummary {
   coverImage?: SanityImageRef;
   plyFile?: SanityR2File;
   blockBottom?: boolean;
+  initialYaw?: number;
+  initialPitch?: number;
 }
 
 export interface SanityIndustry {
@@ -36,6 +38,8 @@ export interface SanityProduct {
   coverImage?: SanityImageRef;
   plyFile?: SanityR2File;
   blockBottom?: boolean;
+  initialYaw?: number;
+  initialPitch?: number;
   media?: SanityMediaItem[];
   scans?: number;
   hasIntegrations?: boolean;

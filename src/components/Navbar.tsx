@@ -43,7 +43,7 @@ export default function Navbar({ industries }: { industries: NavIndustry[] }) {
     <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none" style={{ height: expanded ? "300px" : "140px" }}>
       {/* Download Solaya CTA — top right, hidden on small mobile */}
       <a
-        href="https://solaya.app"
+        href="https://www.solaya.ai/"
         target="_blank"
         rel="noopener noreferrer"
         className="absolute right-4 md:right-[41px] top-[26px] pointer-events-auto hidden sm:inline-flex items-center justify-center h-[38px] px-[20px] rounded-[12px] bg-[#2A2A27] text-[12px] font-medium text-white tracking-[0.2px] hover:bg-[#3a3a37] transition-colors"
@@ -80,7 +80,10 @@ export default function Navbar({ industries }: { industries: NavIndustry[] }) {
               Industry
             </button>
             <div className="ml-auto flex items-center gap-[20px] md:gap-[40px]">
-              <button
+              <a
+                href="https://www.solaya.ai/contact"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="hover:opacity-70 transition-opacity cursor-pointer hidden sm:block"
                 style={{
                   color: expanded ? "#BBBBB7" : "#2A2A27",
@@ -88,9 +91,9 @@ export default function Navbar({ industries }: { industries: NavIndustry[] }) {
                 }}
               >
                 Contact us
-              </button>
+              </a>
               <a
-                href="https://solaya.app"
+                href="https://www.solaya.ai/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:opacity-70 transition-opacity"
@@ -125,11 +128,11 @@ export default function Navbar({ industries }: { industries: NavIndustry[] }) {
                   setExpanded(false);
                   setHoveredIndex(null);
                 }}
-                className="text-[11px] font-medium hover:opacity-70 transition-opacity cursor-pointer text-left"
+                className="text-[11px] font-medium cursor-pointer text-left"
                 style={{
-                  color: "#BBBBB7",
-                  opacity: hoveredIndex !== null ? (index === hoveredIndex ? 1 : 0.3) : 1,
-                  transition: "opacity 300ms ease",
+                  color: hoveredIndex === index ? "#2A2A27" : "#BBBBB7",
+                  opacity: hoveredIndex !== null ? (index === hoveredIndex ? 1 : 0.4) : 1,
+                  transition: "color 300ms ease, opacity 300ms ease",
                 }}
               >
                 {item.title}

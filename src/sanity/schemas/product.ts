@@ -68,6 +68,20 @@ export const product = defineType({
       description: "Prevent users from rotating to see the bottom of the 3D model (useful when the bottom is incomplete)",
     }),
     defineField({
+      name: "initialYaw",
+      title: "3D Initial Yaw (degrees)",
+      type: "number",
+      initialValue: 180,
+      description: "Default horizontal rotation angle for the 3D model (0-360). 180 = front view.",
+    }),
+    defineField({
+      name: "initialPitch",
+      title: "3D Initial Pitch (degrees)",
+      type: "number",
+      initialValue: -3.6,
+      description: "Default vertical tilt for the 3D model. Negative = looking slightly down.",
+    }),
+    defineField({
       name: "scans",
       title: "Number of Scans",
       type: "number",

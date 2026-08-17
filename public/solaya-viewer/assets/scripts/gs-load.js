@@ -246,8 +246,9 @@ GsLoad.prototype.centerGSplat = function (entity) {
     if (camera && camera.script && camera.script.orbitCamera) {
         var orbitCam = camera.script.orbitCamera;
         orbitCam.focus(entity);
-        // Slight downward pitch
-        orbitCam.pitch = -3.6;
+        // Read initial pitch from URL param, default to -3.6
+        var pitchParam = new URL(document.location).searchParams.get("initialPitch");
+        orbitCam.pitch = pitchParam !== null ? parseFloat(pitchParam) : -3.6;
         orbitCam._removeInertia();
         orbitCam._updatePosition();
     }

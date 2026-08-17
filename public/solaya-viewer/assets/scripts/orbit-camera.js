@@ -328,6 +328,15 @@ OrbitCamera.prototype.update = function(dt) {
     this._lastFramePivotPoint.copy(this._pivotPoint);
 
     this._updatePosition();
+
+    // Report rotation angle to parent frame
+    if (this._lastReportedYaw === undefined) this._lastReportedYaw = null;
+    var normalizedYaw = ((this._yaw % 360) + 360) % 360;
+    var rounded = Math.round(normalizedYaw);
+    if (rounded !== this._lastReportedYaw) {
+        this._lastReportedYaw = rounded;
+        try { window.parent.postMessage({ type: 'solaya-viewer-angle', angle: rounded }, '*'); } catch(e) {}
+    }
 };
 
 

@@ -17,7 +17,9 @@ export const allIndustriesQuery = groq`
       brand,
       coverImage,
       plyFile,
-      blockBottom
+      blockBottom,
+      initialYaw,
+      initialPitch
     }
   }
 `;
@@ -39,7 +41,9 @@ export const industryBySlugQuery = groq`
       brand,
       coverImage,
       plyFile,
-      blockBottom
+      blockBottom,
+      initialYaw,
+      initialPitch
     }
   }
 `;
@@ -61,6 +65,8 @@ export const productBySlugQuery = groq`
     coverImage,
     plyFile,
     blockBottom,
+    initialYaw,
+    initialPitch,
     media,
     scans,
     hasIntegrations,

@@ -4,10 +4,10 @@ export default function Footer() {
   return (
     <footer className="bg-bg-primary flex flex-col items-start justify-end px-4 md:px-[31px] py-[27px] w-full gap-[20px] md:gap-[30px]">
       <div className="flex flex-wrap items-center gap-[12px]">
-        <CtaButton href="https://solaya.app" external>
+        <CtaButton href="https://www.solaya.ai/" external>
           Download Solaya
         </CtaButton>
-        <CtaButton href="https://solaya.app/contact" external className="bg-transparent !text-[#2A2A27] border border-[#2A2A27] hover:!bg-[#2A2A27] hover:!text-white">
+        <CtaButton href="https://www.solaya.ai/contact" external className="bg-transparent !text-[#2A2A27] border border-[#2A2A27] hover:!bg-[#2A2A27] hover:!text-white">
           Book a Demo
         </CtaButton>
       </div>

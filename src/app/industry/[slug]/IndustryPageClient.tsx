@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import type { SanityIndustry } from "@/sanity/types";
 import { urlFor } from "@/sanity/lib/image";
@@ -21,12 +21,9 @@ export default function IndustryPageClient({
   totalCount: number;
   allIndustries: SanityIndustry[];
 }) {
-  const [hoveredCell, setHoveredCell] = useState<number | null>(null);
   const [tappedCell, setTappedCell] = useState<number | null>(null);
 
   const products = industry.products || [];
-
-  const isInfoVisible = (i: number) => hoveredCell === i || tappedCell === i;
 
   return (
     <div className="relative min-h-screen bg-bg-primary">
@@ -51,62 +48,45 @@ export default function IndustryPageClient({
               ? urlFor(product.coverImage).width(400).url()
               : "/assets/products/pink-sneaker.png";
 
-            const infoVisible = isInfoVisible(i);
-
             return (
-              <div
-                key={product._id}
-                onMouseEnter={() => setHoveredCell(i)}
-                onMouseLeave={() => setHoveredCell(null)}
-                className="relative aspect-square"
-                style={{
-                  borderRight: "1px solid #e5e5e0",
-                  borderBottom: "1px solid #e5e5e0",
-                }}
-              >
-                <SolayaViewer
-                  splatUrl={product.plyFile?.url || "/assets/models/white-nike-airforce.ply"}
-                  previewImageUrl={fallbackImg}
-                  blockBottom={product.blockBottom}
-                  style={{ width: "100%", height: "100%" }}
-                  onTap={() => {
-                    if (tappedCell === i) {
-                      window.location.href = `/products/${product.slug}`;
-                    } else {
-                      setTappedCell(i);
-                    }
-                  }}
-                />
+              <div key={product._id} className="flex flex-col">
                 <div
+                  className="relative aspect-square"
                   style={{
-                    position: "absolute",
-                    inset: 0,
-                    backgroundColor: infoVisible ? "rgba(0, 0, 0, 0.04)" : "transparent",
-                    transition: "background-color 300ms ease",
-                    pointerEvents: "none",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: 20,
-                    left: 20,
-                    opacity: infoVisible ? 1 : 0,
-                    transform: infoVisible ? "translateY(0)" : "translateY(6px)",
-                    transition: "opacity 250ms ease, transform 250ms ease",
-                    pointerEvents: infoVisible ? "auto" : "none",
+                    borderRight: "1px solid #e5e5e0",
+                    borderBottom: "1px solid #e5e5e0",
                   }}
                 >
-                  <p className="text-[10px] font-medium text-content-secondary mb-[2px]">
+                  <SolayaViewer
+                    splatUrl={product.plyFile?.url || "/assets/models/white-nike-airforce.ply"}
+                    previewImageUrl={fallbackImg}
+                    blockBottom={product.blockBottom}
+                    initialAngle={product.initialYaw}
+                    initialPitch={product.initialPitch}
+                    style={{ width: "100%", height: "100%" }}
+                    onTap={() => {
+                      if (tappedCell === i) {
+                        window.location.href = `/products/${product.slug}`;
+                      } else {
+                        setTappedCell(i);
+                      }
+                    }}
+                  />
+                </div>
+                <Link
+                  href={`/products/${product.slug}`}
+                  className="group px-0 pt-3 pb-4"
+                  style={{
+                    borderRight: "1px solid #e5e5e0",
+                  }}
+                >
+                  <p className="text-[10px] font-medium text-content-secondary mb-[2px] uppercase tracking-wide">
                     {product.brand}
                   </p>
-                  <Link
-                    href={`/products/${product.slug}`}
-                    className="text-[12px] font-medium text-[#2A2A27] hover:underline"
-                  >
+                  <p className="text-[12px] font-medium text-[#2A2A27] group-hover:text-content-secondary transition-colors">
                     {product.title}
-                  </Link>
-                </div>
+                  </p>
+                </Link>
               </div>
             );
           })}
@@ -114,10 +94,10 @@ export default function IndustryPageClient({
       </div>
 
       <div className="px-4 md:px-[41px] pb-10 md:pb-[60px] flex flex-wrap items-center gap-[16px]">
-        <CtaButton href="https://solaya.app" external>
+        <CtaButton href="https://www.solaya.ai/" external>
           Download Solaya
         </CtaButton>
-        <CtaButton href="https://solaya.app/contact" external className="bg-transparent !text-[#2A2A27] border border-[#2A2A27] hover:!bg-[#2A2A27] hover:!text-white">
+        <CtaButton href="https://www.solaya.ai/contact" external className="bg-transparent !text-[#2A2A27] border border-[#2A2A27] hover:!bg-[#2A2A27] hover:!text-white">
           Book a Demo
         </CtaButton>
       </div>

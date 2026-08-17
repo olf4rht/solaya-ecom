@@ -16,6 +16,7 @@ interface SolayaViewerProps {
   previewImageUrl?: string;
   color?: string;
   initialAngle?: number;
+  initialPitch?: number;
   autoLoad?: boolean;
   blockBottom?: boolean;
   className?: string;
@@ -28,6 +29,7 @@ export default function SolayaViewer({
   previewImageUrl,
   color = "#FCFBFB",
   initialAngle = 180,
+  initialPitch,
   autoLoad = true,
   blockBottom = false,
   className,
@@ -65,6 +67,7 @@ export default function SolayaViewer({
   });
   if (previewImageUrl) params.set("previewImgUrl", previewImageUrl);
   if (blockBottom) params.set("blockBottom", "true");
+  if (initialPitch !== undefined) params.set("initialPitch", String(initialPitch));
 
   return (
     <div

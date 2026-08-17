@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import type { SanityProduct, SanityProductSummary, SanityIndustry } from "@/sanity/types";
 import { urlFor } from "@/sanity/lib/image";
@@ -19,7 +19,6 @@ export default function ProductPageClient({
   allProducts: SanityProductSummary[];
   industries: SanityIndustry[];
 }) {
-  // Build media views from media array (exclude cover image / thumbnail)
   type MediaView =
     | { type: "image"; src: string }
     | { type: "video"; src: string }
@@ -37,17 +36,13 @@ export default function ProductPageClient({
     }
   }
 
-  // Fallback if no media at all
   if (views.length === 0) {
     views.push({ type: "image", src: "/assets/products/detail-main.png" });
   }
 
-  // Add 3D viewer as last view if product has a .ply file
   if (product.plyFile?.url) {
     views.push({ type: "3d" });
   }
-
-  const [selectedView, setSelectedView] = useState(0);
 
   const features: { icon: string; label: string; underline?: boolean }[] = [
     { icon: "/assets/icons/scans.svg", label: `${product.scans || 5} scans` },
@@ -65,6 +60,28 @@ export default function ProductPageClient({
       : []),
   ];
 
+  // Fade-in on scroll for media items
+  const mediaRefs = useRef<(HTMLDivElement | null)[]>([]);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).style.opacity = "1";
+            (entry.target as HTMLElement).style.transform = "translateY(0)";
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+
+    mediaRefs.current.forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="bg-bg-primary flex flex-col items-start w-full">
       <Navbar industries={industries} />
@@ -73,93 +90,87 @@ export default function ProductPageClient({
 
       <div className="w-full">
         <div className="flex flex-col lg:flex-row w-full">
-          <div className="flex flex-col sm:flex-row w-full lg:w-auto">
-            <div className="border border-[#ececec] aspect-square sm:aspect-auto sm:h-[500px] lg:h-[935px] relative shrink-0 w-full sm:w-auto sm:flex-1 lg:w-[754px] lg:flex-none overflow-hidden">
-              {views[selectedView].type === "3d" ? (
-                <SolayaViewer
-                  splatUrl={product.plyFile!.url}
-                  blockBottom={product.blockBottom}
-                  style={{ width: "100%", height: "100%" }}
-                />
-              ) : views[selectedView].type === "video" ? (
-                <div className="absolute inset-0 bg-[#f5f5f5] flex items-center justify-center">
-                  <video
-                    key={views[selectedView].src}
-                    src={views[selectedView].src}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="absolute inset-0 bg-[#f5f5f5]">
-                  <Image
-                    src={views[selectedView].src}
-                    alt={product.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 70vw, 754px"
-                    priority
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-row sm:flex-col items-start overflow-x-auto sm:overflow-visible shrink-0 sm:w-[110px]">
-              {views.map((view, index) => {
-                const isSelected = index === selectedView;
-                return (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedView(index)}
-                    className="relative overflow-clip shrink-0 w-[80px] h-[80px] sm:w-[111px] sm:h-[114px] -mb-px -mr-px border border-[#ececec]"
-                  >
-                    <div className="absolute inset-0">
-                      <div className={`absolute inset-0 bg-[#f5f5f5] flex items-center justify-center ${isSelected ? "" : "opacity-20"}`}>
-                        {view.type === "3d" ? (
-                          <span className="text-[10px] font-medium text-content-secondary">3D</span>
-                        ) : view.type === "video" ? (
-                          <span className="text-[10px] font-medium text-content-secondary">▶</span>
-                        ) : (
-                          <Image
-                            src={view.src}
-                            alt={`View ${index + 1}`}
-                            fill
-                            className={`object-cover ${isSelected ? "" : "opacity-20"}`}
-                            sizes="110px"
-                          />
-                        )}
-                      </div>
-                    </div>
-                    <p className="absolute left-[9px] top-[8px] text-[7px] font-medium text-content-tertiary">
-                      {String(index + 1).padStart(2, "0")}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
+          {/* Left: scrolling media */}
+          <div className="w-full lg:w-[65%] flex flex-col">
+            {views.map((view, index) => (
+              <div
+                key={index}
+                ref={(el) => { mediaRefs.current[index] = el; }}
+                className="w-full border-b border-[#ececec]"
+                style={{
+                  opacity: index === 0 ? 1 : 0,
+                  transform: index === 0 ? "translateY(0)" : "translateY(30px)",
+                  transition: "opacity 0.6s ease, transform 0.6s ease",
+                }}
+              >
+                {view.type === "3d" ? (
+                  <div className="relative w-full" style={{ aspectRatio: "4/5" }}>
+                    <SolayaViewer
+                      splatUrl={product.plyFile!.url}
+                      blockBottom={product.blockBottom}
+                      initialAngle={product.initialYaw}
+                      initialPitch={product.initialPitch}
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  </div>
+                ) : view.type === "video" ? (
+                  <div className="relative w-full bg-[#f5f5f5]" style={{ aspectRatio: "4/5" }}>
+                    <video
+                      src={view.src}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative w-full bg-[#f5f5f5]" style={{ aspectRatio: "4/5" }}>
+                    <Image
+                      src={view.src}
+                      alt={product.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 65vw"
+                      priority={index === 0}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
 
-          <div className="flex flex-col gap-6 items-start px-4 md:px-[41px] lg:px-0 py-8 lg:py-0 w-full lg:w-[338px] lg:pt-[258px] lg:ml-auto lg:mr-[calc((100%-754px-110px-338px)/2)]">
-            <h1 className="font-normal text-[24px] md:text-[32px] tracking-[-0.64px] text-content-primary leading-none w-full">
-              {product.title}
-            </h1>
+          {/* Right: sticky product info */}
+          <div className="w-full lg:w-[35%] lg:border-l border-[#ececec]">
+            <div className="lg:sticky lg:top-[140px] flex flex-col gap-6 px-6 md:px-10 lg:px-10 py-8 lg:py-10">
+              <div>
+                <h1 className="font-medium text-[18px] md:text-[22px] tracking-[-0.4px] text-content-primary leading-tight uppercase">
+                  {product.title}
+                </h1>
+                <p className="text-[13px] text-content-secondary mt-1">
+                  {product.category || "Product"}
+                </p>
+              </div>
 
-            <p className="text-[13px] leading-[16px] text-content-secondary w-full">
-              {product.category || "Product"}
-            </p>
+              <div className="flex flex-wrap items-center gap-[12px]">
+                <CtaButton href="https://www.solaya.ai/" external>
+                  Test in Solaya Play
+                </CtaButton>
+                <CtaButton href="https://www.solaya.ai/contact" external className="bg-transparent !text-[#2A2A27] border border-[#2A2A27] hover:!bg-[#2A2A27] hover:!text-white">
+                  Contact Sales
+                </CtaButton>
+              </div>
 
-            <div className="flex flex-col gap-6 items-start w-full">
-              <p className="text-[13px] leading-[16px] text-content-secondary w-full">
-                {product.description || "This is a fictitious product page created by Solaya for demo purposes."}
-              </p>
+              <div className="border-t border-[#ececec] pt-6">
+                <p className="text-[13px] leading-[20px] text-content-secondary">
+                  {product.description || "This is a fictitious product page created by Solaya for demo purposes."}
+                </p>
+              </div>
 
-              <div className="flex flex-col gap-[6px] items-start w-full">
+              <div className="border-t border-[#ececec] pt-6 flex flex-col gap-[8px]">
                 {features.map((feature, index) => (
                   <div key={index} className="flex gap-2 items-center">
-                    <div className="flex items-center justify-center overflow-clip size-6 shrink-0">
+                    <div className="flex items-center justify-center overflow-clip size-5 shrink-0">
                       <Image
                         src={feature.icon}
                         alt=""
@@ -177,35 +188,12 @@ export default function ProductPageClient({
                   </div>
                 ))}
               </div>
-
-              <div className="flex flex-wrap items-center gap-[12px] mt-2">
-                <CtaButton href="https://solaya.app" external>
-                  Test in Solaya Play
-                </CtaButton>
-                <CtaButton href="https://solaya.app/contact" external className="bg-transparent !text-[#2A2A27] border border-[#2A2A27] hover:!bg-[#2A2A27] hover:!text-white">
-                  Contact Sales
-                </CtaButton>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
       <ProductGrid products={allProducts} />
-
-      <div className="w-full px-4 md:px-[41px] py-[40px] md:py-[60px] flex flex-col items-center gap-[16px]">
-        <p className="text-[13px] text-content-secondary text-center max-w-[400px]">
-          Create photorealistic 3D scans of any product in minutes. No studio, no equipment — just your phone.
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-[12px]">
-          <CtaButton href="https://solaya.app" external>
-            Get Started with Solaya
-          </CtaButton>
-          <CtaButton href="https://solaya.app/blog" external className="bg-transparent !text-[#2A2A27] border border-[#2A2A27] hover:!bg-[#2A2A27] hover:!text-white">
-            Read Our Blog
-          </CtaButton>
-        </div>
-      </div>
 
       <Footer />
     </div>

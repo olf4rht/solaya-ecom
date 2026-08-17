@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { SanityIndustry } from "@/sanity/types";
 import { urlFor } from "@/sanity/lib/image";
 
@@ -86,6 +87,7 @@ function ViewToggle({
 }
 
 export default function IndustryShowcase({ industries }: { industries: SanityIndustry[] }) {
+  const router = useRouter();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -94,6 +96,18 @@ export default function IndustryShowcase({ industries }: { industries: SanityInd
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const TOTAL = industries.length;
+  const [viewerAngle, setViewerAngle] = useState(0);
+
+  // Listen for rotation angle from viewer iframe
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === "solaya-viewer-angle") {
+        setViewerAngle(e.data.angle);
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
 
   useEffect(() => {
     const update = () => setWinSize({ w: window.innerWidth, h: window.innerHeight });
@@ -294,10 +308,10 @@ export default function IndustryShowcase({ industries }: { industries: SanityInd
             {industries[activeIndex].brand}
           </span>
         </div>
-        <p className="text-[11px] text-content-tertiary mt-1">0°</p>
+        <p className="text-[11px] text-content-tertiary mt-1">{viewerAngle}°</p>
         <Link
           href={`/industry/${industries[activeIndex].slug}`}
-          className="inline-block mt-4 md:mt-6 text-[11px] font-medium text-content-primary underline underline-offset-2 hover:opacity-70 transition-opacity"
+          className="inline-flex items-center justify-center mt-4 md:mt-6 h-[32px] px-[16px] rounded-[10px] bg-[#2A2A27] text-[11px] font-medium text-white tracking-[0.2px] hover:bg-[#3a3a37] transition-colors"
         >
           View Industry
         </Link>
@@ -331,6 +345,8 @@ export default function IndustryShowcase({ industries }: { industries: SanityInd
                   setHoveredIndex(null);
                   window.dispatchEvent(new CustomEvent("hoverIndustry", { detail: null }));
                   handleExpand(index);
+                } else if (effectiveViewMode === "list" && isActive) {
+                  router.push(`/industry/${item.slug}`);
                 }
               }}
               onMouseEnter={() => {
