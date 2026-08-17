@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import type { SanityIndustry } from "@/sanity/types";
 import { urlFor } from "@/sanity/lib/image";
@@ -22,8 +22,28 @@ export default function IndustryPageClient({
   allIndustries: SanityIndustry[];
 }) {
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
+  // Mobile two-tap: first tap shows info, second tap navigates
+  const [tappedCell, setTappedCell] = useState<number | null>(null);
 
   const products = industry.products || [];
+
+  const handleCellClick = useCallback((i: number, slug: string) => {
+    // On touch devices (no hover), use two-tap pattern
+    const isTouchDevice = window.matchMedia("(hover: none)").matches;
+    if (isTouchDevice) {
+      if (tappedCell === i) {
+        // Second tap — navigate
+        window.location.href = `/products/${slug}`;
+      } else {
+        // First tap — show info
+        setTappedCell(i);
+      }
+    }
+    // On desktop, hover shows info, click always navigates
+  }, [tappedCell]);
+
+  // On mobile, show info for tapped cell
+  const isInfoVisible = (i: number) => hoveredCell === i || tappedCell === i;
 
   return (
     <div className="relative min-h-screen bg-bg-primary">
@@ -48,15 +68,19 @@ export default function IndustryPageClient({
               ? urlFor(product.coverImage).width(400).url()
               : "/assets/products/pink-sneaker.png";
 
+            const infoVisible = isInfoVisible(i);
+
             return (
               <div
                 key={product._id}
                 onMouseEnter={() => setHoveredCell(i)}
                 onMouseLeave={() => setHoveredCell(null)}
+                onClick={() => handleCellClick(i, product.slug)}
                 className="relative aspect-square"
                 style={{
                   borderRight: "1px solid #e5e5e0",
                   borderBottom: "1px solid #e5e5e0",
+                  touchAction: "none",
                 }}
               >
                 <SolayaViewer
@@ -69,7 +93,7 @@ export default function IndustryPageClient({
                   style={{
                     position: "absolute",
                     inset: 0,
-                    backgroundColor: hoveredCell === i ? "rgba(0, 0, 0, 0.04)" : "transparent",
+                    backgroundColor: infoVisible ? "rgba(0, 0, 0, 0.04)" : "transparent",
                     transition: "background-color 300ms ease",
                     pointerEvents: "none",
                   }}
@@ -79,10 +103,10 @@ export default function IndustryPageClient({
                     position: "absolute",
                     bottom: 20,
                     left: 20,
-                    opacity: hoveredCell === i ? 1 : 0,
-                    transform: hoveredCell === i ? "translateY(0)" : "translateY(6px)",
+                    opacity: infoVisible ? 1 : 0,
+                    transform: infoVisible ? "translateY(0)" : "translateY(6px)",
                     transition: "opacity 250ms ease, transform 250ms ease",
-                    pointerEvents: hoveredCell === i ? "auto" : "none",
+                    pointerEvents: infoVisible ? "auto" : "none",
                   }}
                 >
                   <p className="text-[10px] font-medium text-content-secondary mb-[2px]">

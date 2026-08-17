@@ -59,7 +59,7 @@ function ViewToggle({
   onChange: (mode: ViewMode) => void;
 }) {
   return (
-    <div className="fixed top-[30px] right-4 md:right-auto md:left-1/2 md:-translate-x-1/2 z-50 flex items-center h-[38px] md:h-[44px] bg-white rounded-[12px] pl-[12px] md:pl-[15px] pr-[4px] md:pr-[5px] gap-[4px] md:gap-[5px]">
+    <div className="hidden sm:flex fixed top-[30px] md:right-auto md:left-1/2 md:-translate-x-1/2 z-50 items-center h-[38px] md:h-[44px] bg-white rounded-[12px] pl-[12px] md:pl-[15px] pr-[4px] md:pr-[5px] gap-[4px] md:gap-[5px]">
       <span className="text-[11px] font-medium text-content-primary mr-[2px]">View</span>
       <button
         onClick={() => onChange("list")}
@@ -106,6 +106,9 @@ export default function IndustryShowcase({ industries }: { industries: SanityInd
 
   const isMobile = winSize.w < 640;
   const isTablet = winSize.w >= 640 && winSize.w < 1024;
+
+  // On mobile, always use list view
+  const effectiveViewMode = isMobile ? "list" : viewMode;
 
   // Grid positions: responsive sizing
   const getGridPos = useCallback((index: number) => {
@@ -177,11 +180,11 @@ export default function IndustryShowcase({ industries }: { industries: SanityInd
   }, [TOTAL]);
 
   const handleClose = useCallback(() => {
-    if (isAnimating) return;
+    if (isAnimating || isMobile) return;
     setIsAnimating(true);
     setViewMode("grid");
     setTimeout(() => setIsAnimating(false), DURATION);
-  }, [isAnimating]);
+  }, [isAnimating, isMobile]);
 
   const handleViewChange = useCallback((mode: ViewMode) => {
     if (isAnimating) return;
@@ -194,7 +197,7 @@ export default function IndustryShowcase({ industries }: { industries: SanityInd
   // Scroll/wheel navigation in expanded mode
   const touchStartY = useRef<number | null>(null);
   useEffect(() => {
-    if (viewMode !== "list") return;
+    if (effectiveViewMode !== "list") return;
 
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
@@ -239,7 +242,7 @@ export default function IndustryShowcase({ industries }: { industries: SanityInd
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [viewMode, activeIndex, isAnimating, TOTAL]);
+  }, [effectiveViewMode, activeIndex, isAnimating, TOTAL]);
 
   const expanded = getExpandedPos();
 
@@ -247,14 +250,14 @@ export default function IndustryShowcase({ industries }: { industries: SanityInd
     <>
       <ViewToggle viewMode={viewMode} onChange={handleViewChange} />
 
-      {/* Close button — list view only */}
-      {viewMode === "list" && (
+      {/* Close button — list view only, not on mobile */}
+      {effectiveViewMode === "list" && !isMobile && (
         <button
           onClick={handleClose}
           className="fixed z-50 cursor-pointer"
           style={{
-            top: isMobile ? "90px" : "200px",
-            right: isMobile ? "16px" : "41px",
+            top: "200px",
+            right: "41px",
             padding: "8px",
             opacity: isAnimating ? 0 : 1,
             transition: `opacity 400ms ${EASE}`,
@@ -271,10 +274,10 @@ export default function IndustryShowcase({ industries }: { industries: SanityInd
           top: isMobile ? "auto" : "160px",
           bottom: isMobile ? "24px" : "auto",
           left: isMobile ? "16px" : "41px",
-          opacity: viewMode === "list" && !isAnimating ? 1 : 0,
-          transform: viewMode === "list" && !isAnimating ? "translateY(0)" : "translateY(12px)",
-          transition: `opacity 500ms ${EASE} ${viewMode === "list" ? "300ms" : "0ms"}, transform 500ms ${EASE} ${viewMode === "list" ? "300ms" : "0ms"}`,
-          pointerEvents: viewMode === "list" && !isAnimating ? "auto" : "none",
+          opacity: effectiveViewMode === "list" && !isAnimating ? 1 : 0,
+          transform: effectiveViewMode === "list" && !isAnimating ? "translateY(0)" : "translateY(12px)",
+          transition: `opacity 500ms ${EASE} ${effectiveViewMode === "list" ? "300ms" : "0ms"}, transform 500ms ${EASE} ${effectiveViewMode === "list" ? "300ms" : "0ms"}`,
+          pointerEvents: effectiveViewMode === "list" && !isAnimating ? "auto" : "none",
         }}
       >
         <p className="text-[11px] font-medium text-content-secondary tracking-wide mb-2">
@@ -308,14 +311,14 @@ export default function IndustryShowcase({ industries }: { industries: SanityInd
 
           // In grid mode: show at grid position
           // In list mode: active item at expanded pos, others hidden
-          const isExpanded = viewMode === "list";
+          const isExpanded = effectiveViewMode === "list";
           const showExpanded = isExpanded && isActive;
           const hidden = isExpanded && !isActive;
 
           const pos = showExpanded ? expanded : grid;
 
           // In grid mode with hover: hovered item full opacity, others 50%
-          const gridHoverOpacity = viewMode === "grid" && hoveredIndex !== null
+          const gridHoverOpacity = effectiveViewMode === "grid" && hoveredIndex !== null
             ? (index === hoveredIndex ? 1 : 0.5)
             : 1;
           const itemOpacity = hidden ? 0 : gridHoverOpacity;
@@ -324,20 +327,20 @@ export default function IndustryShowcase({ industries }: { industries: SanityInd
             <div
               key={item._id}
               onClick={() => {
-                if (viewMode === "grid" && !isAnimating) {
+                if (effectiveViewMode === "grid" && !isAnimating) {
                   setHoveredIndex(null);
                   window.dispatchEvent(new CustomEvent("hoverIndustry", { detail: null }));
                   handleExpand(index);
                 }
               }}
               onMouseEnter={() => {
-                if (viewMode === "grid") {
+                if (effectiveViewMode === "grid") {
                   setHoveredIndex(index);
                   window.dispatchEvent(new CustomEvent("hoverIndustry", { detail: index }));
                 }
               }}
               onMouseLeave={() => {
-                if (viewMode === "grid") {
+                if (effectiveViewMode === "grid") {
                   setHoveredIndex(null);
                   window.dispatchEvent(new CustomEvent("hoverIndustry", { detail: null }));
                 }
@@ -350,7 +353,7 @@ export default function IndustryShowcase({ industries }: { industries: SanityInd
                 height: pos.height,
                 opacity: itemOpacity,
                 transition: `left ${DURATION}ms ${EASE}, top ${DURATION}ms ${EASE}, width ${DURATION}ms ${EASE}, height ${DURATION}ms ${EASE}, opacity 300ms ${EASE}`,
-                cursor: viewMode === "grid" ? "pointer" : "default",
+                cursor: effectiveViewMode === "grid" ? "pointer" : "default",
                 pointerEvents: hidden ? "none" : "auto",
                 willChange: "left, top, width, height, opacity",
               }}

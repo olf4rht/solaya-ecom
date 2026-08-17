@@ -41,17 +41,21 @@ export default function SolayaViewer({
   if (blockBottom) params.set("blockBottom", "true");
 
   return (
-    <iframe
-      src={`/solaya-viewer/index.html?${params.toString()}`}
+    <div
+      style={{ width: "100%", height: "100%", touchAction: "none", ...style }}
       className={className}
-      style={{
-        border: "none",
-        width: "100%",
-        height: "100%",
-        ...style,
-      }}
-      allow="fullscreen"
-      loading="lazy"
-    />
+    >
+      <iframe
+        src={`/solaya-viewer/index.html?${params.toString()}`}
+        style={{
+          border: "none",
+          width: "100%",
+          height: "100%",
+          touchAction: "none",
+        }}
+        allow="fullscreen"
+        loading="lazy"
+      />
+    </div>
   );
 }

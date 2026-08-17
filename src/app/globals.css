@@ -42,6 +42,11 @@ body {
   color: var(--color-content-primary);
   font-family: var(--font-saans);
   overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  font-family: inherit;
 }
 
 /* Smooth scroll with native feel */
