@@ -241,19 +241,13 @@ GsLoad.prototype.centerGSplat = function (entity) {
         entity.setLocalScale(scaleFactorY, scaleFactorY, scaleFactorY);
     } 
 
-    // if (fullX >= fullY) {
-    //     // If max dimension is along the X-axis, scale X to 3
-    //     const scaleFactorX = 3 / fullX;//3
-    //     entity.setLocalScale(scaleFactorX, scaleFactorX, scaleFactorX);
-    // } else {
-    //     // If max dimension is along the Y-axis, scale Y to 2
-    //     const scaleFactorY = 2 / fullY;
-    //     entity.setLocalScale(scaleFactorY, scaleFactorY, scaleFactorY);
-    // } 
-
-
-
-
+    // Re-focus the orbit camera on the centered model so rotation
+    // pivots around the center of gravity
+    var camera = this.app.root.findByName("Camera");
+    if (camera && camera.script && camera.script.orbitCamera) {
+        camera.script.orbitCamera.pivotPoint = new pc.Vec3(0, 0, 0);
+        camera.script.orbitCamera.focus(entity);
+    }
 };
 
 GsLoad.prototype.update = function (dt) {
