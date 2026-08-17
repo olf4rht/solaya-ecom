@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar";
 import ProductGrid from "@/components/ProductGrid";
 import Footer from "@/components/Footer";
 import CtaButton from "@/components/CtaButton";
+import SolayaViewer from "@/components/SolayaViewer";
 
 export default function ProductPageClient({
   product,
@@ -18,21 +19,14 @@ export default function ProductPageClient({
   allProducts: SanityProductSummary[];
   industries: SanityIndustry[];
 }) {
-  // Build image list from media array
+  // Build image list from media array (exclude cover image / thumbnail)
   const detailImages: string[] = [];
 
-  // Add cover image first
-  if (product.coverImage) {
-    detailImages.push(urlFor(product.coverImage).width(1200).url());
-  }
-
-  // Add media items
   if (product.media) {
     for (const item of product.media) {
       if (item._type === "image") {
         detailImages.push(urlFor(item).width(1200).url());
       }
-      // R2 videos could be added here too but for now we focus on images
     }
   }
 
@@ -40,6 +34,11 @@ export default function ProductPageClient({
   if (detailImages.length === 0) {
     detailImages.push("/assets/products/detail-main.png");
   }
+
+  // Add 3D viewer as last view if product has a .ply file
+  const has3D = !!product.plyFile?.url;
+  const threeDIndex = has3D ? detailImages.length : -1;
+  const totalViews = detailImages.length + (has3D ? 1 : 0);
 
   const [selectedImage, setSelectedImage] = useState(0);
 
@@ -69,21 +68,29 @@ export default function ProductPageClient({
         <div className="flex flex-col lg:flex-row w-full">
           <div className="flex flex-col sm:flex-row w-full lg:w-auto">
             <div className="border border-[#ececec] aspect-square sm:aspect-auto sm:h-[500px] lg:h-[935px] relative shrink-0 w-full sm:w-auto sm:flex-1 lg:w-[754px] lg:flex-none overflow-hidden">
-              <div className="absolute inset-0 bg-[#f5f5f5]">
-                <Image
-                  src={detailImages[selectedImage]}
-                  alt={product.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 70vw, 754px"
-                  priority
+              {selectedImage === threeDIndex ? (
+                <SolayaViewer
+                  splatUrl={product.plyFile!.url}
+                  style={{ width: "100%", height: "100%" }}
                 />
-              </div>
+              ) : (
+                <div className="absolute inset-0 bg-[#f5f5f5]">
+                  <Image
+                    src={detailImages[selectedImage]}
+                    alt={product.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 70vw, 754px"
+                    priority
+                  />
+                </div>
+              )}
             </div>
 
             <div className="flex flex-row sm:flex-col items-start overflow-x-auto sm:overflow-visible shrink-0 sm:w-[110px]">
-              {detailImages.map((img, index) => {
+              {Array.from({ length: totalViews }, (_, index) => {
                 const isSelected = index === selectedImage;
+                const is3D = index === threeDIndex;
                 return (
                   <button
                     key={index}
@@ -91,14 +98,18 @@ export default function ProductPageClient({
                     className="relative overflow-clip shrink-0 w-[80px] h-[80px] sm:w-[111px] sm:h-[114px] -mb-px -mr-px border border-[#ececec]"
                   >
                     <div className="absolute inset-0">
-                      <div className={`absolute inset-0 bg-[#f5f5f5] ${isSelected ? "" : "opacity-20"}`}>
-                        <Image
-                          src={img}
-                          alt={`View ${index + 1}`}
-                          fill
-                          className={`object-cover ${isSelected ? "" : "opacity-20"}`}
-                          sizes="110px"
-                        />
+                      <div className={`absolute inset-0 bg-[#f5f5f5] flex items-center justify-center ${isSelected ? "" : "opacity-20"}`}>
+                        {is3D ? (
+                          <span className="text-[10px] font-medium text-content-secondary">3D</span>
+                        ) : (
+                          <Image
+                            src={detailImages[index]}
+                            alt={`View ${index + 1}`}
+                            fill
+                            className={`object-cover ${isSelected ? "" : "opacity-20"}`}
+                            sizes="110px"
+                          />
+                        )}
                       </div>
                     </div>
                     <p className="absolute left-[9px] top-[8px] text-[7px] font-medium text-content-tertiary">
