@@ -98,13 +98,13 @@ export default function ProductPageClient({
                 ref={(el) => { mediaRefs.current[index] = el; }}
                 className="w-full border-b border-[#ececec]"
                 style={{
-                  opacity: index === 0 ? 1 : 0,
-                  transform: index === 0 ? "translateY(0)" : "translateY(30px)",
+                  opacity: index === 0 || views[index].type === "3d" ? 1 : 0,
+                  transform: index === 0 || views[index].type === "3d" ? "translateY(0)" : "translateY(30px)",
                   transition: "opacity 0.6s ease, transform 0.6s ease",
                 }}
               >
                 {view.type === "3d" ? (
-                  <div className="relative w-full" style={{ aspectRatio: "3/4" }}>
+                  <div className="relative w-full" style={{ aspectRatio: "1/1" }}>
                     <SolayaViewer
                       splatUrl={product.plyFile!.url}
                       blockBottom={product.blockBottom}
