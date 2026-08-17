@@ -104,7 +104,7 @@ export default function ProductPageClient({
                 }}
               >
                 {view.type === "3d" ? (
-                  <div className="relative w-full" style={{ aspectRatio: "1/1" }}>
+                  <div className="relative w-full" style={{ aspectRatio: "3/4" }}>
                     <SolayaViewer
                       splatUrl={product.plyFile!.url}
                       blockBottom={product.blockBottom}
@@ -114,7 +114,7 @@ export default function ProductPageClient({
                     />
                   </div>
                 ) : view.type === "video" ? (
-                  <div className="relative w-full bg-[#f5f5f5]" style={{ aspectRatio: "1/1" }}>
+                  <div className="relative w-full bg-[#f5f5f5]" style={{ aspectRatio: "3/4" }}>
                     <video
                       src={view.src}
                       autoPlay
@@ -125,7 +125,7 @@ export default function ProductPageClient({
                     />
                   </div>
                 ) : (
-                  <div className="relative w-full bg-[#f5f5f5]" style={{ aspectRatio: "1/1" }}>
+                  <div className="relative w-full bg-[#f5f5f5]" style={{ aspectRatio: "3/4" }}>
                     <Image
                       src={view.src}
                       alt={product.title}
