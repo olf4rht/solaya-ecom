@@ -113,7 +113,7 @@ OrbitCamera.prototype.focus = function (focusEntity) {
     distance = (distance / Math.tan(0.5 * this.entity.camera.fov * pc.math.DEG_TO_RAD));
     distance = (distance * 2);
     // Apply a zoom factor to zoom out a little
-    var zoomFactor = 1.5; // You can adjust this value to control how much zoom out you want
+    var zoomFactor = 1.85;
     distance *= zoomFactor;
     //
     this.distance = distance;

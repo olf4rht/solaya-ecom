@@ -247,7 +247,7 @@ GsLoad.prototype.centerGSplat = function (entity) {
         var orbitCam = camera.script.orbitCamera;
         orbitCam.focus(entity);
         // Slight downward pitch
-        orbitCam.pitch = -6.2;
+        orbitCam.pitch = -3.6;
         orbitCam._removeInertia();
         orbitCam._updatePosition();
     }

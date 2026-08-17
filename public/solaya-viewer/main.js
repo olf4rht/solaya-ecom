@@ -80,7 +80,7 @@ assetListLoader.load(() => {
         clearColorBuffer: true,
         clearDepthBuffer: true,
         clearColor: loadingPageColor,
-        fov: 10.3, // 120mm equivalent on 35mm sensor
+        fov: 5.5,
     });
     camera.setPosition(0, 0.1, 4.22);
     camera.addComponent('script');
