@@ -44,20 +44,16 @@ export default function ProductPageClient({
     views.push({ type: "3d" });
   }
 
-  const features: { icon: string; label: string; underline?: boolean }[] = [
-    { icon: "/assets/icons/scans.svg", label: `${product.scans || 5} scans` },
-    ...(product.hasIntegrations !== false
-      ? [{ icon: "/assets/icons/integrations.svg", label: "Integrations available" }]
-      : []),
-    ...(product.hasExtensions !== false
-      ? [{ icon: "/assets/icons/extensions.svg", label: "Extensions included" }]
-      : []),
+  const bullets: { label: string; href?: string }[] = [
+    { label: "3D obtained through a 2min smartphone scan." },
+    { label: "Pictures and video produced using Solaya Studio." },
+    { label: "-90% content production costs." },
+    { label: "+20% conversion rate." },
+    { label: "-25% return rate." },
     ...(product.plyFile?.url
-      ? [{ icon: "/assets/icons/ply-file.svg", label: "Link to .ply file", underline: true }]
+      ? [{ label: "Download .ply file", href: product.plyFile.url }]
       : []),
-    ...(product.commercialUsage !== false
-      ? [{ icon: "/assets/icons/commercial.svg", label: "Commercial usage available" }]
-      : []),
+    { label: "Contact us for .glb, .obj, .usd, .usdz, .fbx formats", href: "https://www.solaya.ai/contact" },
   ];
 
   // Fade-in on scroll for media items
@@ -167,24 +163,24 @@ export default function ProductPageClient({
                 </p>
               </div>
 
-              <div className="border-t border-[#ececec] pt-6 flex flex-col gap-[8px]">
-                {features.map((feature, index) => (
-                  <div key={index} className="flex gap-2 items-center">
-                    <div className="flex items-center justify-center overflow-clip size-5 shrink-0">
-                      <Image
-                        src={feature.icon}
-                        alt=""
-                        width={14}
-                        height={14}
-                      />
-                    </div>
-                    <span
-                      className={`text-[12px] font-medium text-content-secondary whitespace-nowrap ${
-                        feature.underline ? "underline" : ""
-                      }`}
-                    >
-                      {feature.label}
-                    </span>
+              <div className="border-t border-[#ececec] pt-6 flex flex-col gap-[6px]">
+                {bullets.map((bullet, index) => (
+                  <div key={index} className="flex gap-2 items-start">
+                    <span className="text-[12px] text-content-secondary mt-[2px]">•</span>
+                    {bullet.href ? (
+                      <a
+                        href={bullet.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[12px] font-medium text-content-secondary underline hover:text-content-primary transition-colors"
+                      >
+                        {bullet.label}
+                      </a>
+                    ) : (
+                      <span className="text-[12px] font-medium text-content-secondary">
+                        {bullet.label}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
